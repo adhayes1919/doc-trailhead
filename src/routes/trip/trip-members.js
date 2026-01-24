@@ -39,12 +39,11 @@ export function admit(req, res) {
 
 export function sendToWaitlist(req, res) {
   const { tripId, userId } = req.params
-
   // Can't send owner to wailist
   const owner = req.db.get('SELECT owner FROM trips WHERE id = ?', tripId).owner
   if (userId === owner) return res.sendStatus(400)
 
-  req.db.run('UPDATE trip_members SET pending = 1 WHERE trip = ? and user = ?', tripId, userId)
+  req.db.run('UPDATE trip_members SET pending = 1, leader = 0 WHERE trip = ? and user = ?', tripId, userId)
   mailer.send(emails.getTripRemovalEmail, req.db, tripId, userId)
   return tripCard.renderLeaderCard(req, res, tripId, userId)
 }
