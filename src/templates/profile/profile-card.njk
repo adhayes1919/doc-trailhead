@@ -22,6 +22,7 @@
   <dl>
     <dt>Driver Certifications<dd>{{ driver_certifications }}
     <dt>Leader For<dd>{{ leader_for }}
+        {% include "profile/medcert/medcert.njk" %}
   </dl>
   {% if not hide_controls %}
   <div hx-swap=innerHTML hx-target="closest section" class=button-row>

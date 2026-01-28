@@ -78,7 +78,7 @@
   font-size: 1.1em;
 }
 
-.profile-card select, .profile-card input[type=number] {
+.profile-card select, .profile-card input[type=number], .profile-card input[type=date] {
   border: 2px solid #c4c4c4;
   border-radius: 10px;
   background: white;
