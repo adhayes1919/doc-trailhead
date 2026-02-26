@@ -1,6 +1,20 @@
-    <dt> Med Certs / Expiration <dd> 
-        <select name="medcert-type">
+    <dt> Med Cert 
+    <dd> <select name="medcert_type">
+            <!-- #TODO: CSS I don't understand makes these extend past the trip card, NOT worth my time right now though...
+            <option> Basic First Aid + CPR
+            <option> Wilderness First Aid (WFA)
+            <option> Wilderness Advanced First Aid (WAFA)
+            <option> Wilderness First Responder (WFR)
+            <option> Outdoor Emergency Care (OEC)
+            <option> Wilderness EMT (W-EMT)
+            -->
+            <option> None
+            <option> Basic First Aid(+CPR)
             <option> WFA
+            <option> WAFA
             <option> WFR
+            <option> OEC
+            <option> W-EMT
         </select>
-        <input id="expiration" type="date" default="expiration date?">  
+    <dt class="nonsense"> Med Cert Expiration 
+    <dd> <input name="medcert_expiration" type="date" default="expiration date?">  
