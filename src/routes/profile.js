@@ -1,5 +1,6 @@
 import { BadRequestError, NotFoundError } from '../request/errors.js'
 import dateFormat from 'dateformat'
+import * as utils from '../utils.js'
 
 
 export function getProfileView(req, res) {
@@ -64,13 +65,15 @@ function getProfileData(req, userId, hideControls) {
     .join(', ')
 
     //TODO: error checking / if statement here
-    //NOTE: certs_med or cert_med? cert make sense logically (one cert per person) but certs makes sense structurally (certs_vehicles already exists)
     //TODO:  make a function for this...
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (certs_med) {
     user.medcert_type = certs_med.type
     const medcert_expiration_date = new Date(certs_med.expiration)
-    user.medcert_expiration = dateFormat(medcert_expiration_date, "mm-dd-yyyy")
+    user.medcert_expiration_date = medcert_expiration_date.toISOString().split('T')[0]; // for calendar view
+        console.log(user.medcert_expiration_date)
+    user.medcert_expiration = dateFormat(medcert_expiration_date, "mm-dd-yyyy") // for table view
+
   }
 
   if (user.shoe_size) {
@@ -92,6 +95,16 @@ function getProfileData(req, userId, hideControls) {
     ) as clubs
     FROM club_leaders
     LEFT JOIN clubs ON club_leaders.club = clubs.id
+    WHERE user = ?
+  `, userId)?.clubs || 'none'
+
+  user.chair_for = req.db.get(`
+    SELECT group_concat(
+      iif(is_approved = 1, name, name || ' (pending)'),
+      ', '
+    ) as clubs
+    FROM club_chairs
+    LEFT JOIN clubs ON club_chairs.club = clubs.id
     WHERE user = ?
   `, userId)?.clubs || 'none'
   user.hide_controls = hideControls
@@ -333,16 +346,7 @@ export function getClubChairRequest(req, res) {
     ORDER BY name
   `, userId)
 
-  const clubsWithoutUser = req.db.all(`
-    SELECT id, name
-    FROM clubs
-    WHERE active = 1 AND NOT EXISTS
-      (SELECT *
-      FROM club_chairs AS cc
-      WHERE user = ? AND cc.club = clubs.id
-      )
-    ORDER BY name
-  `, userId)
+
 
   const clubListItems = userClubs.map(club => `
   <li>${club.name}${club.is_approved === 0 ? ' (pending)' : ''}
@@ -353,7 +357,7 @@ export function getClubChairRequest(req, res) {
           hx-swap="outerHTML"
   ><img src="/static/icons/close-icon.svg"></button>
   `)
-  const options = clubsWithoutUser.map(club => `<option value=${club.id}>${club.name}</option>`)
+  const options = userLeader.map(club => `<option value=${club.id}>${club.name}</option>`)
   const form = `
 <form hx-boost=true
       hx-push-url=false

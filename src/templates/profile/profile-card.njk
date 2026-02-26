@@ -20,13 +20,15 @@
 </section>
 <section>
   <dl>
-    {% include "profile/medcert/medcert.njk" %}
+    <dt>Med cert <dd>{{ medcert_type }}
+    <dt>Med cert valid until <dd>{{ medcert_expiration }}
   </dl>
 </section>
 <section>
   <dl>
 <dt>Leader For<dd>{{ leader_for }}
-    <dt>Driver Certifications<dd>{{ driver_certifications }}
+<dt>Driver Certifications<dd>{{ driver_certifications }}
+<dt>Chair For<dd>{{ chair_for}}
   </dl>
   {% if not hide_controls %}
   <div hx-swap=innerHTML hx-target="closest section" class=button-row>
