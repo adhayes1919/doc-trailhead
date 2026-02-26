@@ -91,10 +91,10 @@ router.get(     '/profile/:userId/driver-cert',             requireAuth, profile
 router.post(    '/profile/:userId/driver-cert',             requireAuth, profile.postDriverCertRequest)
 router.get(     '/profile/:userId/club-leadership',         requireAuth, profile.getClubLeadershipRequest)
 router.post(    '/profile/:userId/club-leadership',         requireAuth, profile.postClubLeadershipRequest)
-router.delete(  '/profile/:userId/club-leadership',         requireAuth, profile.deleteClubLeadershipRequest)
+router.delete(  '/profile/:userId/club-leadership/:clubId',         requireAuth, profile.deleteClubLeadershipRequest)
 router.get(     '/profile/:userId/club-chair',         requireAuth, profile.getClubChairRequest)
 router.post(    '/profile/:userId/club-chair',         requireAuth, profile.postClubChairRequest)
-router.delete(  '/profile/:userId/club-chair',         requireAuth, profile.deleteClubChairRequest)
+router.delete(  '/profile/:userId/club-chair/:clubId',         requireAuth, profile.deleteClubChairRequest)
 
 /**********************
  * Trip Routes

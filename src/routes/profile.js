@@ -252,7 +252,7 @@ export function getClubLeadershipRequest(req, res) {
   const clubListItems = userClubs.map(club => `
   <li>${club.name}${club.is_approved === 0 ? ' (pending)' : ''}
   <button
-          hx-delete="/profile/${userId}/club-leadership"
+          hx-delete="/profile/${userId}/club-leadership/${club.id}"
           hx-confirm="Are you sure you want to remove yourself as a${club.is_approved === 0 ? ' (pending)' : ''} leader of ${club.name}?"
           hx-target="closest li"
           hx-swap="outerHTML"
@@ -290,10 +290,10 @@ export function postClubLeadershipRequest(req, res) {
 
 export function deleteClubLeadershipRequest(req, res) {
   const userId = parseInt(req.params.userId)
+  const clubId = parseInt(req.params.clubId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
-
   const { changes } = req.db
-    .run('DELETE FROM club_leaders WHERE user = ? AND club = ?', userId, req.params.userId)
+    .run('DELETE FROM club_leaders WHERE user = ? AND club = ?', userId, clubId)
 
   if (changes < 1) return res.sendStatus(400)
   return res.send('').status(200)
@@ -347,7 +347,7 @@ export function getClubChairRequest(req, res) {
   const clubListItems = userClubs.map(club => `
   <li>${club.name}${club.is_approved === 0 ? ' (pending)' : ''}
   <button
-          hx-delete="/profile/${userId}/club-chair"
+          hx-delete="/profile/${userId}/club-chair/${club.id}"
           hx-confirm="Are you sure you want to remove yourself as a${club.is_approved === 0 ? ' (pending)' : ''} chair of ${club.name}?"
           hx-target="closest li"
           hx-swap="outerHTML"
@@ -383,10 +383,11 @@ export function postClubChairRequest(req, res) {
 }
 export function deleteClubChairRequest(req, res) {
   const userId = parseInt(req.params.userId)
+  const clubId = parseInt(req.params.clubId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
 
   const { changes } = req.db
-    .run('DELETE FROM club_chairs WHERE user = ? AND club = ?', userId, req.params.userId)
+    .run('DELETE FROM club_chairs WHERE user = ? AND club = ?', userId, clubId)
 
   if (changes < 1) return res.sendStatus(400)
   return res.send('').status(200)
