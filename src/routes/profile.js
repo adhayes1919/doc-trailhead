@@ -65,16 +65,13 @@ function getProfileData(req, userId, hideControls) {
 
     //TODO: error checking / if statement here
     //NOTE: certs_med or cert_med? cert make sense logically (one cert per person) but certs makes sense structurally (certs_vehicles already exists)
+    //TODO:  make a function for this...
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
-
-  user.medcert_type = certs_med.type
-  const medcert_expiration_date = new Date(certs_med.expiration)
-  user.medcert_expiration = dateFormat(medcert_expiration_date, "mm-dd-yyyy")
-
-
-
-    //.toISOString().split("T")[0];
-
+  if (certs_med) {
+    user.medcert_type = certs_med.type
+    const medcert_expiration_date = new Date(certs_med.expiration)
+    user.medcert_expiration = dateFormat(medcert_expiration_date, "mm-dd-yyyy")
+  }
 
   if (user.shoe_size) {
     const split = user.shoe_size.split('-')
@@ -138,17 +135,16 @@ export function put(req, res) {
 
 
     //TODO: prolly need to clean this or sum
-    const medcert_type = formData.medcert_type
-    const medcert_expiration = new Date(formData.medcert_expiration).getTime()
+  const medcert_type = formData.medcert_type
+  const medcert_expiration = new Date(formData.medcert_expiration).getTime()
 
-    if (medcert_type && medcert_expiration) { 
+  if (medcert_type && medcert_expiration) { 
         //TODO: some "else {}" for an error
         //NOTE: also might not have needed all this but eh
         //NOTE: some places have 'user_id' and some have 'userId'...
-          req.db.run(`
-            INSERT or IGNORE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) `, formData.user_id, medcert_type, medcert_expiration)
-        }
-
+        //TODO: this could probably (maybe?) become a seperate function
+    req.db.run(` INSERT or IGNORE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) `, formData.user_id, medcert_type, medcert_expiration)
+  }
     
   if (formData.new_user === 'true') {
     res.set('HX-Redirect', '/all-trips')
@@ -215,6 +211,23 @@ export function postDriverCertRequest(req, res) {
 export function getClubLeadershipRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
+  
+  //NOTE: should I bother...?
+  
+  const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
+  if (!certs_med) {
+    const disclaimer = `
+<div>
+  <div class="warn-message">
+  You do not have any med certs saved. Please make sure you have a valid med cert before requesting club leadership.
+  </div>
+  <button class="action deny" hx-get="/profile/${userId}?card=true">Cancel</button>
+</div>
+    `
+        res.send(disclaimer).status(200)
+  }
+  
+
 
   const userClubs = req.db.all(`
     SELECT clubs.id, name, is_approved
