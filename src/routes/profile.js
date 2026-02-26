@@ -210,9 +210,12 @@ export function postDriverCertRequest(req, res) {
 
 export function getClubLeadershipRequest(req, res) {
   const userId = parseInt(req.params.userId)
+
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
   
   //NOTE: should I bother...?
+  //TODO: this is in the wrong branch lmfao
+    //kindaaa don't feel like fixing that, it'll ultimately be part of this anyway...
   
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (!certs_med) {
@@ -226,8 +229,6 @@ export function getClubLeadershipRequest(req, res) {
     `
         res.send(disclaimer).status(200)
   }
-  
-
 
   const userClubs = req.db.all(`
     SELECT clubs.id, name, is_approved
@@ -236,6 +237,7 @@ export function getClubLeadershipRequest(req, res) {
     WHERE user = ?
     ORDER BY name
   `, userId)
+
   const clubsWithoutUser = req.db.all(`
     SELECT id, name
     FROM clubs
@@ -292,6 +294,99 @@ export function deleteClubLeadershipRequest(req, res) {
 
   const { changes } = req.db
     .run('DELETE FROM club_leaders WHERE user = ? AND club = ?', userId, req.params.userId)
+
+  if (changes < 1) return res.sendStatus(400)
+  return res.send('').status(200)
+}
+
+export function getClubChairRequest(req, res) {
+  const userId = parseInt(req.params.userId)
+
+  if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
+
+
+  const userLeader = req.db.all(`
+    SELECT clubs.id, name, is_approved
+    FROM club_leaders
+    LEFT JOIN clubs ON clubs.id = club_leaders.club
+    WHERE user = ?
+    ORDER BY name
+  `, userId)
+
+  if (!userLeader) {
+    const disclaimer = `
+<div>
+  <div class="warn-message">
+    You are not currently a leader in any clubs. Please request club leadership before chair priviledges.
+  </div>
+  <button class="action deny" hx-get="/profile/${userId}?card=true">Cancel</button>
+</div>
+    `
+        res.send(disclaimer).status(200)
+  }
+
+  const userClubs = req.db.all(`
+    SELECT clubs.id, name, is_approved
+    FROM club_chairs
+    LEFT JOIN clubs ON clubs.id = club_chairs.club
+    WHERE user = ?
+    ORDER BY name
+  `, userId)
+
+  const clubsWithoutUser = req.db.all(`
+    SELECT id, name
+    FROM clubs
+    WHERE active = 1 AND NOT EXISTS
+      (SELECT *
+      FROM club_chairs AS cc
+      WHERE user = ? AND cc.club = clubs.id
+      )
+    ORDER BY name
+  `, userId)
+
+  const clubListItems = userClubs.map(club => `
+  <li>${club.name}${club.is_approved === 0 ? ' (pending)' : ''}
+  <button
+          hx-delete="/profile/${userId}/club-chair"
+          hx-confirm="Are you sure you want to remove yourself as a${club.is_approved === 0 ? ' (pending)' : ''} chair of ${club.name}?"
+          hx-target="closest li"
+          hx-swap="outerHTML"
+  ><img src="/static/icons/close-icon.svg"></button>
+  `)
+  const options = clubsWithoutUser.map(club => `<option value=${club.id}>${club.name}</option>`)
+  const form = `
+<form hx-boost=true
+      hx-push-url=false
+      action=/profile/${userId}/club-chair
+      method=post class="club-chair-request">
+<ul>${clubListItems.join(' ')}</ul>
+<div>
+  <select name=club>${options}</select>
+  <button class="action approve" type=submit>Request</button>
+</div>
+  <button class="action deny" hx-get="/profile/${userId}?card=true">Close</button>
+</form>
+  `
+  res.send(form).status(200)
+}
+export function postClubChairRequest(req, res) {
+  const userId = parseInt(req.params.userId)
+  if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
+
+  const club = req.body.club
+  if (!club) return res.sendStatus(400)
+
+  const is_approved = res.locals.is_opo === true ? 1 : 0
+  req.db.run('INSERT INTO club_chairs (user, club, is_approved) VALUES (?, ?, ?)',
+    userId, club, is_approved)
+  return getProfileCard(req, res)
+}
+export function deleteClubChairRequest(req, res) {
+  const userId = parseInt(req.params.userId)
+  if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
+
+  const { changes } = req.db
+    .run('DELETE FROM club_chairs WHERE user = ? AND club = ?', userId, req.params.userId)
 
   if (changes < 1) return res.sendStatus(400)
   return res.send('').status(200)

@@ -1,0 +1,63 @@
+{% include "common/site-head.njk" %}
+<title>Profile Approvals - DOC Trailhead</title>
+<link rel="stylesheet" href="/static/css/approvals.css">
+
+{% include "common/site-nav.njk" %}
+{% include "common/chair-nav.njk" %}
+
+<main>
+
+<section class="leaders info-card">
+<h1>Leadership requests</h1>
+{% if leadership_requests.length === 0 %}
+<div><div class=notice>All set for now</div></div>
+{% else %}
+<table class=trip-table>
+<thead><tr><th>Person<th>Request<th>Medcert<th>Medcert expiration<th></tr></thead>
+<tbody>
+{% for request in leadership_requests %}
+  <tr>
+  <td>{{request.requester_name}}
+  <td>{{request.requested_item}}
+  <td>{{request.medcert_type}}
+  <td>{{request.medcert_expiration}}
+  <td>
+    <button
+      class="action deny"
+      hx-confirm="Deny {{request.requester_name}} as a leader for {{request.requested_item}}?"
+      hx-delete="/opo/profile-approvals/leaders/{{request.req_id}}"
+      hx-target="closest tr"
+      hx-swap="outerHTML swap:.7s"
+      >Deny
+    </button>
+    <button
+      class="action approve"
+      hx-confirm="Approve {{request.requester_name}} as a leader for {{request.requested_item}}?"
+      hx-put="/opo/profile-approvals/leaders/{{request.req_id}}"
+      hx-target="closest tr"
+      hx-swap="outerHTML swap:.7s"
+      >Approve
+    </button>
+  </tr>
+{% endfor %}
+</table>
+{% endif %}
+</section>
+
+
+<section class="info-card">
+<h1>User Profile Search</h1>
+<input type=search
+       name=search
+       autocomplete=off
+       placeholder="Begin typing to serach users"
+       hx-post="/opo/profile-approvals/search"
+       hx-trigger="keyup changed delay:500ms, search"
+       hx-target="#search-results"
+       hx-swap=outerHTML
+       >
+<div id=search-results class=notice>Results will display here</div>
+</section>
+
+</main>
+

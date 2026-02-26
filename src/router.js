@@ -21,12 +21,16 @@ import * as gearApprovals from './routes/opo/gear-approvals.js'
 
 import * as tripApprovalsView from './routes/opo/trip-approvals.js'
 import * as vehicleRequests from './routes/opo/vehicle-requests.js'
-
 import * as profileApprovals from './routes/opo/profile-approvals.js'
 import * as manageFleet from './routes/opo/manage-fleet.js'
 
+// TODO: these can get better names, wont worry about them yet...
+import * as chairTripApprovalsView from './routes/chair/trip-approvals.js'
+import * as chairVehicleRequests from './routes/chair/vehicle-requests.js'
+import * as chairProfileApprovals from './routes/chair/profile-approvals.js'
+
 import * as authentication from './services/authentication.js'
-const { requireAuth, requireAnyLeader, requireTripLeader, requireOpo } = authentication
+const { requireAuth, requireAnyLeader, requireTripLeader, requireAnyChair, requireOpo } = authentication
 
 const router = Router()
 
@@ -59,6 +63,19 @@ router.get('/opo/calendar', requireOpo, (_req, res) => {
   res.render('views/opo/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
 })
 
+//TODO: change to club chair views...
+//TODO: add a "requireClubChair" verification. I think I can just call everything a "chair" and give others a chair-equivalent view?
+
+router.get('/chair/vehicle-requests', requireAnyChair, chairVehicleRequests.get)
+router.get('/chair/trip-approvals', requireAnyChair, chairTripApprovalsView.get)
+router.get('/chair/profile-approvals', requireAnyChair, chairProfileApprovals.get)
+router.get('/chair/calendar', requireAnyChair, (_req, res) => {
+  res.render('views/chair/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
+})
+
+
+
+
 /**********************
  * User Profile Routes
  **********************/
@@ -75,6 +92,9 @@ router.post(    '/profile/:userId/driver-cert',             requireAuth, profile
 router.get(     '/profile/:userId/club-leadership',         requireAuth, profile.getClubLeadershipRequest)
 router.post(    '/profile/:userId/club-leadership',         requireAuth, profile.postClubLeadershipRequest)
 router.delete(  '/profile/:userId/club-leadership',         requireAuth, profile.deleteClubLeadershipRequest)
+router.get(     '/profile/:userId/club-chair',         requireAuth, profile.getClubChairRequest)
+router.post(    '/profile/:userId/club-chair',         requireAuth, profile.postClubChairRequest)
+router.delete(  '/profile/:userId/club-chair',         requireAuth, profile.deleteClubChairRequest)
 
 /**********************
  * Trip Routes
@@ -150,6 +170,8 @@ router.put(     '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileA
 router.delete(  '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileApprovals.denyLeadershipRequest)
 router.put(     '/opo/profile-approvals/certs/:req_id',     requireOpo, profileApprovals.approveCertRequest)
 router.delete(  '/opo/profile-approvals/certs/:req_id',     requireOpo, profileApprovals.denyCertRequest)
+router.put(     '/opo/profile-approvals/chair/:req_id',     requireOpo, profileApprovals.approveChairRequest)
+router.delete(  '/opo/profile-approvals/chair/:req_id',     requireOpo, profileApprovals.denyChairRequest)
 router.post(    '/opo/profile-approvals/search',            requireOpo, profileApprovals.searchUsers)
 
 // Some components

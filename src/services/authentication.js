@@ -41,8 +41,13 @@ export function requireAuth(req, res, next) {
     if (!userInfo.is_profile_complete && !req.url.includes('/new-user')) {
       return res.redirect(303, '/new-user')
     }
-
     res.locals.is_opo = userInfo.is_opo === 1
+
+    const isChair = req.db.get(`
+      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`,
+    req.user)?.is_chair >= 1
+
+    res.locals.is_chair = isChair
     return next()
   }
 
@@ -60,6 +65,19 @@ export function requireAnyLeader(req, res, next) {
     req.user)?.is_leader === 1
 
     if (isLeader) return next()
+    return res.sendStatus(403)
+  })
+}
+
+/** Allow the request if the user is a chair of ANY club, or an OPO staffer. */
+//NOTE: might eventually remove the OPO part as its redudndant unless I add a "simualate chair" view, which I don't really expect to be all that useful
+export function requireAnyChair(req, res, next) {
+  return requireAuth(req, res, () => {
+    if (res.locals.is_opo === true) return next()
+    const isChair = req.db.get(`
+      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`,
+    req.user)?.is_chair >= 1
+    if (isChair) return next()
     return res.sendStatus(403)
   })
 }

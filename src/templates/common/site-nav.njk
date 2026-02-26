@@ -5,6 +5,11 @@
   <li><a href="/opo/calendar">Calendar</a>
   <li><a href="/opo/manage-fleet">Fleet</a>
   {% endif %}
+
+  {% if is_chair %}
+  <li><a href="/chair/trip-approvals">ClubChair</a></li>
+  <li><a href="/chair/calendar">ChairCalendar</a></li>
+  {% endif %}
   <li><a href="/all-trips">All Trips</a></li>
   <li><a href="/my-trips">My Trips</a></li>
   <li><a href="/profile">Profile</a></li>

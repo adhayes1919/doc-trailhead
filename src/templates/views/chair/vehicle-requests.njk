@@ -1,0 +1,59 @@
+{% include "common/site-head.njk" %}
+<title>Vehicle Requests - DOC Trailhead</title>
+<link rel="stylesheet" href="/static/css/approvals.css">
+
+{% include "common/site-nav.njk" %}
+{% include "common/opo-nav.njk" %}
+
+<main>
+
+<section class="pending info-card">
+<h1>Pending Vehicle Requests</h1>
+{% if pending_requests.length === 0 %}
+<div class=notice>All set for now</div>
+{% else %}
+<div class=trip-table-overflow-wrapper>
+<table class=trip-table>
+<thead><tr><th>Trip #<th>Title<th>Requester<th>Pickup<th>Return
+<tbody>
+  {% for request in pending_requests %}
+  <tr>
+  <td>{{request.trip_id}}
+  <td><a href="/leader/trip/{{request.trip_id}}#vehicle-request">{{request.reason}}</a>
+  <td>{{request.requester_name}}
+  <td>{{request.pickup_time_element | safe }}
+  <td>{{request.return_time_element | safe }}
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endif %}
+</section>
+
+<section class="reviewed info-card">
+<h1>Reviewed Vehicle Requests</h1>
+{% if reviewed_requests.length === 0 %}
+<div class=notice>All set for now</div>
+{% else %}
+<div class=trip-table-overflow-wrapper>
+<table class=trip-table>
+<thead><tr><th>Trip #<th>Title<th>Requester<th>Pickup<th>Return<th>Status
+<tbody>
+  {% for request in reviewed_requests %}
+  <tr>
+  <td>{{request.trip_id}}
+  <td><a href="/leader/trip/{{request.trip_id}}#vehicle-request">{{request.reason}}</a>
+  <td>{{request.requester_name}}
+  <td>{{request.pickup_time_element | safe }}
+  <td>{{request.return_time_element | safe }}
+  <td>{{request.status_element | safe }}
+  </tr>
+  {% endfor %}
+</tr>
+</table>
+</div>
+{% endif %}
+</section>
+
+</main>
+

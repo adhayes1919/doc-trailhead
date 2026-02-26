@@ -77,6 +77,41 @@
 {% endif %}
 </section>
 
+<section class="chair info-card">
+<h1>Club chair requests</h1>
+{% if chair_requests.length === 0 %}
+<div><div class=notice>All set for now</div></div>
+{% else %}
+<table class=trip-table>
+<thead><tr><th>Person<th>Request<th></tr></thead>
+<tbody>
+{% for request in chair_requests %}
+  <tr>
+  <td>{{request.requester_name}}
+  <td>{{request.requested_item}}
+  <td>
+    <button
+      class="action deny"
+      hx-confirm="Deny {{request.requester_name}} as a chair for {{request.requested_item}}?"
+      hx-delete="/opo/profile-approvals/chair/{{request.req_id}}"
+      hx-target="closest tr"
+      hx-swap="outerHTML swap:.7s"
+      >Deny
+    </button>
+    <button
+      class="action approve"
+      hx-confirm="Approve {{request.requester_name}} as a chair for {{request.requested_item}}?"
+      hx-put="/opo/profile-approvals/chair/{{request.req_id}}"
+      hx-target="closest tr"
+      hx-swap="outerHTML swap:.7s"
+      >Approve
+    </button>
+  </tr>
+{% endfor %}
+</table>
+{% endif %}
+</section>
+
 <section class="info-card">
 <h1>User Profile Search</h1>
 <input type=search

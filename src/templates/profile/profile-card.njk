@@ -36,6 +36,9 @@
     <button class="action edit" hx-get="/profile/{{ id }}/club-leadership">
       {{ 'Edit' if is_opo == true else 'Request' }} Club Leadership
     </button>
+    <button class="action edit" hx-get="/profile/{{ id }}/club-chair">
+      {{ 'Edit' if is_opo == true else 'Request' }} Club Chair
+    </button>
   </div>
   {% endif %}
 </section>

@@ -1,27 +1,47 @@
+import dateFormat from 'dateformat'
+
 export function get(req, res) {
+  const userId = parseInt(req.user)
+  const userChairIn = req.db.all(`
+    SELECT 
+        clubs.id,
+        clubs.name
+    FROM club_chairs
+    LEFT JOIN clubs ON clubs.id = club_chairs.club
+    WHERE user = ? AND is_approved = 1
+    ORDER BY name
+  `, userId)
+    const clubIds = userChairIn.map(({ id }) => id);
+
+    //TODO: note the medcert naming inconsistencies
   const leadership_requests = req.db.all(`
-   SELECT club_leaders.rowid as req_id, users.name AS requester_name, clubs.name AS requested_item
+   SELECT 
+    club_leaders.rowid as req_id, 
+    users.name AS requester_name, 
+    clubs.name AS requested_item, 
+    clubs.id as clubid,
+    certs_med.type as medcert_type,
+    certs_med.expiration as medcert_expiration
    FROM club_leaders
    LEFT JOIN clubs ON clubs.id = club_leaders.club
    LEFT JOIN users ON users.id = club_leaders.user
-   WHERE is_approved = 0
-   `)
+   LEFT JOIN certs_med ON certs_med.user = club_leaders.user
+   WHERE is_approved = 0 AND clubid in (${clubIds.join(',')})
+   `).map(row => {
+      if (!row.medcert_expiration) {
+        row.medcert_expiration = null;
+        return row;
+      }
+      const date = new Date(row.medcert_expiration);
+      if (isNaN(date.getTime())) {
+        row.medcert_expiration = null;
+        return row;
+      }
+      row.medcert_expiration = dateFormat(date, "mm-dd-yyyy");
+      return row;
+      })
 
-  const chair_requests = req.db.all(`
-   SELECT club_chairs.rowid as req_id, users.name AS requester_name, clubs.name AS requested_item
-   FROM club_chairs
-   LEFT JOIN clubs ON clubs.id = club_chairs.club
-   LEFT JOIN users ON users.id = club_chairs.user
-   WHERE is_approved = 0
-   `)
-
-  const cert_requests = req.db.all(`
-   SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
-   FROM certs_vehicles
-   LEFT JOIN users ON users.id = certs_vehicles.user
-   WHERE is_approved = 0`)
-
-  return res.render('views/opo/profile-approvals.njk', { leadership_requests, cert_requests, chair_requests })
+  return res.render('views/chair/profile-approvals.njk', { leadership_requests })
 }
 
 // TODO: Add is_approved = 0 to all these WHERE statements
@@ -54,20 +74,6 @@ export function denyCertRequest(req, res) {
   return res.status(200).send('')
 }
 
-export function approveChairRequest(req, res) {
-  const rowid = req.params.req_id
-  if (!rowid) return res.sendStatus(400)
-  req.db.run('UPDATE club_chairs SET is_approved = 1 WHERE rowid = ?', rowid)
-  return res.status(200).send('')
-}
-
-export function denyChairRequest(req, res) {
-  const rowid = req.params.req_id
-  if (!rowid) return res.sendStatus(400)
-  req.db.run('DELETE FROM club_chairs WHERE rowid = ?', rowid)
-  return res.status(200).send('')
-}
-
 export function searchUsers(req, res) {
   const search = req.body.search
   if (!search?.length || search.length < 1) {
@@ -80,5 +86,5 @@ export function searchUsers(req, res) {
     return res.send('<div id=search-results class=notice>Too many results, keep typing to narrow them</div>')
   }
 
-  return res.render('views/opo/user-search-results.njk', { users })
+  return res.render('views/chair/user-search-results.njk', { users })
 }
