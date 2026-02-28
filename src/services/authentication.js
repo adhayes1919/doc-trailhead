@@ -71,9 +71,12 @@ export function requireAnyLeader(req, res, next) {
 
 /** Allow the request if the user is a chair of ANY club, or an OPO staffer. */
 //NOTE: might eventually remove the OPO part as its redudndant unless I add a "simualate chair" view, which I don't really expect to be all that useful
+//
+//TODO:: !! literally cannot comprehend why every component checks if leader directly
 export function requireAnyChair(req, res, next) {
   return requireAuth(req, res, () => {
     if (res.locals.is_opo === true) return next()
+
     const isChair = req.db.get(`
       SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`,
     req.user)?.is_chair >= 1
@@ -83,20 +86,37 @@ export function requireAnyChair(req, res, next) {
 }
 
 /** Allow the request if the user is a leader the specific trip, or an OPO staffer */
+//NOTE: this is getting messy to have "trip leader or opo or chair...", feels like theres gotta be a better type
+
 export function requireTripLeader(req, res, next) {
   return requireAuth(req, res, () => {
     const tripId = req.params.tripId
     if (!tripId) throw new Error('Trip Leader authorization used on a route without a trip.')
 
+    //TODO: nottt really loving the inconsistencies in user or req.user or req.user.parms or userId or user_id...
+
+        // is this not "req.db.isLeaderForTrip)" ?
     const isLeader = req.db.get(`
       SELECT 1 as is_leader
       FROM trip_members WHERE user = ? AND trip = ? AND leader = 1
     `, req.user, tripId)?.is_leader === 1
 
-    // Set a variable that says the current use is a leader for THIS trip
-    if (isLeader) res.locals.is_leader_for_trip = true
+    const isChair = req.db.get(`
+      SELECT 1 as is_chair FROM club_chairs     
+        WHERE 
+          user = ? AND 
+          is_approved = TRUE AND 
+          club = (select club from trips where id = ?)
+    `, req.user, tripId)?.is_chair === 1
 
-    if (res.locals.is_opo === true || isLeader) return next()
+        console.log(`ischair? : ${isChair}`);
+
+    // Set a variable that says the current use is a leader for THIS trip
+    //if (isLeader) res.locals.is_leader_for_trip = true
+    if (isChair) res.locals.is_leader_for_trip = true
+
+    //if (res.locals.is_opo === true || isLeader ) return next()
+    if (res.locals.is_opo === true || isChair  ) return next()
 
     return res.sendStatus(403)
   })
