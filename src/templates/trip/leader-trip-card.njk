@@ -97,6 +97,10 @@ on time. 48 hours before trip-start you can begin checking out your trip.
     <ul>
       {% for gear in member.requested_gear %}
       <li>{{ gear.name }}
+
+
+
+
       {% endfor %}
     </ul>
   </td>
@@ -201,6 +205,15 @@ on time. 48 hours before trip-start you can begin checking out your trip.
   Note: this only includes the gear request of trippees that have been admitted.
   Admitting additional trippees will change the request.
   </p>
+
+
+</div>
+<div>
+  <div class=table-status-row><h3>Group Gear</h3>{{ group_gear_status | safe }}</div>
+  <table class="detail-table gear">
+    {% for item in group_gear %}
+    <tr> <th>{{ item.name }}<td>{{ item.quantity }} 
+
   {% if show_member_gear_approval_buttons %}
   <div class=button-row>
     <button class="action deny" hx-put="/opo/member-gear/{{ trip_id }}/deny">Deny</button>
@@ -211,17 +224,17 @@ on time. 48 hours before trip-start you can begin checking out your trip.
     {% endif %}
   </div>
   {% endif %}
-</div>
-<div>
-  <div class=table-status-row><h3>Group Gear</h3>{{ group_gear_status | safe }}</div>
-  <table class="detail-table gear">
-    {% for item in group_gear %}
-    <tr><th>{{ item.name }}<td>{{ item.quantity }}
+
     {% endfor %}
   </table>
   {% if show_group_gear_approval_buttons %}
   <div class=button-row>
     <button class="action deny" hx-put="/opo/group-gear/{{ trip_id }}/deny">Deny</button>
+
+    <div hx-swap=innerHTML hx-target="closest section" class=button-row>
+        <button class="action deny" hx-get="/opo/group-gear/adjust">Adjust</button>
+    </div>
+
     {% if group_gear_approved === 1 %}
     <button class="action edit" hx-put="/opo/group-gear/{{ trip_id }}/reset">Reset</button>
     {% else %}
@@ -256,6 +269,7 @@ on time. 48 hours before trip-start you can begin checking out your trip.
              {% if pcard_request.is_approved === 1 %}disabled{%endif%}
              >
     </label>
+
     <div class=button-row>
       <button class="action deny" hx-put="/opo/pcard/{{ trip_id }}/deny">Deny</button>
       {% if pcard_request.is_approved === 1 %}
@@ -264,6 +278,7 @@ on time. 48 hours before trip-start you can begin checking out your trip.
       <button class="action approve" type=submit>Approve</button>
       {% endif %}
     </div>
+
   </form>
   {% else %}
   <p>Assigned P-Card: {{ pcard_request.assigned_pcard }}</p>

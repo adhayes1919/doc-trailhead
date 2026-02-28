@@ -4,6 +4,7 @@ import * as emails from '../../emails.js'
 import * as mailer from '../../services/mailer.js'
 import { BadRequestError } from '../../request/errors.js'
 
+//TODO: lmao this is gear AND vehicles???
 export function approveVehicleRequest(req, res) {
   if (!req.params.requestId) return res.sendStatus(400)
   const vehiclerequest = req.db
@@ -75,6 +76,19 @@ export function resetVehicleRequest(req, res) {
 export function approveGroupGear(req, res) {
   if (!req.params.tripId) return res.sendStatus(400)
   req.db.run('UPDATE trips SET group_gear_approved = true WHERE id = ?', req.params.tripId)
+  tripCard.renderLeaderCard(req, res, req.params.tripId, req.user)
+}
+
+export function getAdjustGroupGear(req, res) {
+    const adjustedValue = `
+    <div>
+        <input type=number>
+    </div>`
+}
+
+export function putAdjustGroupGear(req, res) {
+  if (!req.params.tripId) return res.sendStatus(400)
+  req.db.run('UPDATE trips SET group_gear_approved = true, quantity = ?  WHERE id = ?', req.params.quantity, req.params.tripId)
   tripCard.renderLeaderCard(req, res, req.params.tripId, req.user)
 }
 
