@@ -318,6 +318,7 @@ export function getClubChairRequest(req, res) {
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
 
 
+    //TODO: gotta change this to allow things like poco...
   const userLeader = req.db.all(`
     SELECT clubs.id, name, is_approved
     FROM club_leaders
