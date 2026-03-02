@@ -1,0 +1,53 @@
+{% include "common/site-head.njk" %}
+<title>Manage Clubs- DOC Trailhead</title>
+<link rel="stylesheet" href="/static/css/manage-fleet.css">
+
+{% include "common/site-nav.njk" %}
+<main>
+
+<section class="add-vehicle info-card">
+<h1>Add Club</h1>
+<form action="/opo/manage-clubs" method=post>
+  <label for=name>Club Name</label>
+  <input type=text id=name name=name placeholder="Cabin and Trail">
+  <button class="action approve">Add</button>
+</form>
+</section>
+
+<section class="fleet info-card">
+<h1>Club list</h1>
+<div class=trip-table-overflow-wrapper>
+<table class=trip-table>
+<thead><tr><th>Name<th>
+<tbody>
+{% for club in active_clubs %}
+  <tr>
+    <td>{{ club.name }}
+    <td><button
+        class="action deny"
+        hx-confirm="Make {{ club.name }} an inactive club?"
+        hx-patch="/opo/manage-clubs/make-inactive/{{ club.id }}"
+        hx-target="this"
+        hx-swap="outerHTML"
+      >Make Inactive</button>
+  </tr>
+{% endfor %}
+
+{% for club in inactive_clubs %}
+  <tr>
+    <td>{{ club.name }}
+    <td><button
+        class="action approve"
+        hx-confirm="Make {{ club.name }} an active club?"
+        hx-patch="/opo/manage-clubs/make-active/{{ club.id }}"
+        hx-target="this"
+        hx-swap="outerHTML"
+      >Make Active</button>
+  </tr>
+{% endfor %}
+</table>
+</div>
+</section>
+
+</main>
+

@@ -75,10 +75,11 @@ function getProfileData(req, userId, hideControls) {
     SELECT group_concat(
       iif(is_approved = 1, name, name || ' (pending)'),
       ', '
+        ORDER BY clubs.name
     ) as clubs
     FROM club_leaders
     LEFT JOIN clubs ON club_leaders.club = clubs.id
-    WHERE user = ?
+    WHERE user = ? AND clubs.active = 1
   `, userId)?.clubs || 'none'
   user.hide_controls = hideControls
   delete user.is_opo // TODO stop using a SELECT * so you don't have to do this

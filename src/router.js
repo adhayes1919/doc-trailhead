@@ -23,7 +23,9 @@ import * as tripApprovalsView from './routes/opo/trip-approvals.js'
 import * as vehicleRequests from './routes/opo/vehicle-requests.js'
 
 import * as profileApprovals from './routes/opo/profile-approvals.js'
+
 import * as manageFleet from './routes/opo/manage-fleet.js'
+import * as manageClubs from './routes/opo/manage-clubs.js'
 
 import * as authentication from './services/authentication.js'
 const { requireAuth, requireAnyLeader, requireTripLeader, requireOpo } = authentication
@@ -52,6 +54,7 @@ router.get('/all-trips', requireAuth, allTripsView.get)
 router.get('/opo/vehicle-requests', requireOpo, vehicleRequests.get)
 router.get('/opo/trip-approvals', requireOpo, tripApprovalsView.get)
 router.get('/opo/manage-fleet', requireOpo, manageFleet.get)
+router.get('/opo/manage-clubs', requireOpo, manageClubs.get)
 router.get('/opo/profile-approvals', requireOpo, profileApprovals.get)
 router.get('/leader/trip/:tripId', requireTripLeader, trip.getLeaderView)
 
@@ -145,6 +148,12 @@ router.put(     '/opo/pcard/:tripId/reset',                 requireOpo, gearAppr
 
 router.post(    '/opo/manage-fleet',                        requireOpo, manageFleet.post)
 router.delete(  '/opo/manage-fleet/:id',                    requireOpo, manageFleet.del)
+
+router.post(    '/opo/manage-clubs',                        requireOpo, manageClubs.post)
+
+//TODO: put vs post vs patch here?
+router.patch(  '/opo/manage-clubs/make-inactive/:id',                    requireOpo, manageClubs.makeInactive)
+router.patch(  '/opo/manage-clubs/make-active/:id',                    requireOpo, manageClubs.makeActive)
 
 router.put(     '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileApprovals.approveLeadershipRequest)
 router.delete(  '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileApprovals.denyLeadershipRequest)
