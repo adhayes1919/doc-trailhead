@@ -139,8 +139,6 @@ export function createTrip(req, res) {
     tripMembers
   )
 
-  mailer.send(emails.getNewTripEmail, req.db, tripId)
-
   const redirectUrl = req.body.goto_requests === 'on'
     ? `/trip/${tripId}/requests`
     : `/leader/trip/${tripId}`
