@@ -15,13 +15,22 @@ export function get(req, res) {
    WHERE opo_approved = 0
    `)
 
+  const active_chairs = req.db.all(`
+   SELECT club_chairs.rowid as chair_id, users.name AS user_name, clubs.name AS club_name
+   FROM club_chairs
+   LEFT JOIN clubs ON clubs.id = club_chairs.club
+   LEFT JOIN users ON users.id = club_chairs.user
+   WHERE opo_approved = 1 
+   ORDER BY club_name
+   `)
+
   const cert_requests = req.db.all(`
    SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
    FROM certs_vehicles
    LEFT JOIN users ON users.id = certs_vehicles.user
    WHERE opo_approved = 0`)
 
-  return res.render('views/opo/profile-approvals.njk', { leadership_requests, cert_requests, chair_requests })
+  return res.render('views/opo/profile-approvals.njk', { leadership_requests, chair_requests, active_chairs, cert_requests })
 }
 
 export function approveLeadershipRequest(req, res) {
@@ -60,9 +69,11 @@ export function approveChairRequest(req, res) {
 }
 
 export function denyChairRequest(req, res) {
+    console.log("in deny?")
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('DELETE FROM club_chairs WHERE rowid = ? AND opo_approved = 0', rowid)
+    //NOTE: this COULD have "AND opo_approved = 0" as a previous comment suggested, but then I would have to duplicate logic to have "deny" and "remove as club chair" which probbbbbably is better in practice but things happen....
+  req.db.run('DELETE FROM club_chairs WHERE rowid = ?', rowid)
   return res.status(200).send('')
 }
 

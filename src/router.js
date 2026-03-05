@@ -63,15 +63,11 @@ router.get('/opo/calendar', requireOpo, (_req, res) => {
   res.render('views/opo/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
 })
 
-//TODO: change to club chair views...
-//TODO: add a "requireClubChair" verification. I think I can just call everything a "chair" and give others a chair-equivalent view?
-
-//TODO: these need to get moved lmao
 router.get('/chair/vehicle-requests', requireAnyChair, chairVehicleRequests.get)
 router.get('/chair/trip-approvals', requireAnyChair, chairTripApprovalsView.get)
 router.get('/chair/profile-approvals', requireAnyChair, chairProfileApprovals.get)
 
-
+//TODO: decide if this has any use tbh
 router.get('/chair/calendar', requireAnyChair, (_req, res) => {
   res.render('views/chair/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
 })
