@@ -20,7 +20,7 @@ function getVehicleRequests(req) {
       iif(trips.id IS NOT NULL, trips.title, request_details) as reason,
       first_pickup,
       last_return,
-      iif(is_approved IS NULL, 'pending', iif(is_approved = 1, 'approved', 'denied')) as status
+      iif(opo_approved IS NULL, 'pending', iif(opo_approved = 1, 'approved', 'denied')) as status
     FROM vehiclerequests
     LEFT JOIN (
       SELECT vehiclerequest, min(pickup_time) AS first_pickup, max(return_time) AS last_return

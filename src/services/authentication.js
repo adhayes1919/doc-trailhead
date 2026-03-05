@@ -44,7 +44,7 @@ export function requireAuth(req, res, next) {
     res.locals.is_opo = userInfo.is_opo === 1
 
     const isChair = req.db.get(`
-      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`,
+      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and opo_approved = TRUE`,
     req.user)?.is_chair >= 1
 
     res.locals.is_chair = isChair
@@ -61,7 +61,7 @@ export function requireAnyLeader(req, res, next) {
   return requireAuth(req, res, () => {
     if (res.locals.is_opo === true) return next()
     const isLeader = req.db.get(`
-      SELECT 1 as is_leader FROM club_leaders WHERE user = ? and is_approved = TRUE`,
+      SELECT 1 as is_leader FROM club_leaders WHERE user = ? and opo_approved = TRUE`,
     req.user)?.is_leader === 1
 
     if (isLeader) return next()
@@ -78,7 +78,7 @@ export function requireAnyChair(req, res, next) {
     if (res.locals.is_opo === true) return next()
 
     const isChair = req.db.get(`
-      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`,
+      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and opo_approved = TRUE`,
     req.user)?.is_chair >= 1
     if (isChair) return next()
     return res.sendStatus(403)
@@ -105,7 +105,7 @@ export function requireTripLeader(req, res, next) {
       SELECT 1 as is_chair FROM club_chairs     
         WHERE 
           user = ? AND 
-          is_approved = TRUE AND 
+          opo_approved = TRUE AND 
           club = (select club from trips where id = ?)
     `, req.user, tripId)?.is_chair === 1
 

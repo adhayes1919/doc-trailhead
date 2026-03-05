@@ -15,7 +15,7 @@ function getClubs(db, userId, isOpo) {
       SELECT clubs.id, clubs.name
       FROM club_leaders
       LEFT JOIN clubs ON clubs.id = club_leaders.club
-      WHERE user = ? AND is_approved = 1
+      WHERE user = ? AND opo_approved = 1
       ORDER BY name
       `, userId)
   }
@@ -41,7 +41,7 @@ export function getLeaderView(req, res) {
       SELECT 1 as is_chair FROM club_chairs     
         WHERE 
           user = ? AND 
-          is_approved = TRUE AND 
+          opo_approved = TRUE AND 
           club = (select club from trips where id = ?)
     `, req.user, tripId)?.is_chair === 1
 

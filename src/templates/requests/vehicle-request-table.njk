@@ -28,7 +28,7 @@
     <dd>
       <select id="vehicle-{{ loop.index }}"
               name="vehicle-{{ loop.index }}"
-              {% if vehiclerequest_is_approved != null %}disabled{% endif %}
+              {% if vehiclerequest_opo_approved != null %}disabled{% endif %}
               autocomplete=off
               required
               >
@@ -42,7 +42,7 @@
                name="key-{{ loop.index }}"
                type=text
                value="{{ vehicle.vehicle_key }}"
-               {% if vehiclerequest_is_approved != null %}disabled{% endif %}
+               {% if vehiclerequest_opo_approved != null %}disabled{% endif %}
                autocomplete=off
                required></dd>
     <dt><label for="pickup-{{ loop.index }}">Assigned Pickup</label></dt>
@@ -52,7 +52,7 @@
              name="pickup-{{ loop.index }}"
              value="{{ vehicle.assigned_pickup_time }}"
              type=datetime-local
-             {% if vehiclerequest_is_approved != null %}disabled{% endif %}
+             {% if vehiclerequest_opo_approved != null %}disabled{% endif %}
              autocomplete=off
              required
              >
@@ -63,7 +63,7 @@
                name="return-{{ loop.index }}"
                value="{{ vehicle.assigned_return_time }}"
                type=datetime-local
-               {% if vehiclerequest_is_approved != null %}disabled{% endif %}
+               {% if vehiclerequest_opo_approved != null %}disabled{% endif %}
                autocomplete=off
                required
                >
@@ -82,7 +82,7 @@
   {% if is_opo %}
   <div class=button-row>
     <button class="action deny" type=button hx-put="/opo/vehiclerequest/{{ vehiclerequest_id }}/deny">Deny</button>
-    {% if vehiclerequest_is_approved !== null %}
+    {% if vehiclerequest_opo_approved !== null %}
     <button class="action edit" type=button hx-put="/opo/vehiclerequest/{{ vehiclerequest_id }}/reset">Reset</button>
     {% else %}
     <button class="action approve" type=submit>Assign Vehicles</button>

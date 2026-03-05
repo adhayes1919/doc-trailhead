@@ -8,7 +8,7 @@ export function get(req, res) {
         clubs.name
     FROM club_chairs
     LEFT JOIN clubs ON clubs.id = club_chairs.club
-    WHERE user = ? AND is_approved = 1
+    WHERE user = ? AND opo_approved = 1
     ORDER BY name
   `, userId)
     const clubIds = userChairIn.map(({ id }) => id);
@@ -26,7 +26,7 @@ export function get(req, res) {
    LEFT JOIN clubs ON clubs.id = club_leaders.club
    LEFT JOIN users ON users.id = club_leaders.user
    LEFT JOIN certs_med ON certs_med.user = club_leaders.user
-   WHERE is_approved = 0 AND clubid in (${clubIds.join(',')})
+   WHERE opo_approved = 0 AND chair_approved = 0 AND clubid in (${clubIds.join(',')})
    `).map(row => {
       if (!row.medcert_expiration) {
         row.medcert_expiration = null;
@@ -44,8 +44,6 @@ export function get(req, res) {
   return res.render('views/chair/profile-approvals.njk', { leadership_requests })
 }
 
-// TODO: Add is_approved = 0 to all these WHERE statements
-// That way it's only possible to change something that the interface is displaying
 export function approveLeadershipRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)

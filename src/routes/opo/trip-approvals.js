@@ -11,11 +11,11 @@ const OPO_TRIPS_QUERY = `
       group_gear_approved,
       iif(vr.id IS NULL,
         'N/A',
-        iif(vr.is_approved IS NULL, 'pending', iif(vr.is_approved = 0, 'denied', 'approved'))
+        iif(vr.opo_approved IS NULL, 'pending', iif(vr.opo_approved = 0, 'denied', 'approved'))
       ) AS vr_status,
       iif(pc.rowid IS NULL,
         'N/A',
-        iif(pc.is_approved IS NULL, 'pending', iif(pc.is_approved = 0, 'denied', 'approved'))
+        iif(pc.opo_approved IS NULL, 'pending', iif(pc.opo_approved = 0, 'denied', 'approved'))
       ) AS pc_status,
     iif(trips.member_gear_approved IS NULL,
       iif(mg.count IS NULL, 'N/A', 'pending'),

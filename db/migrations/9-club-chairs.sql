@@ -1,8 +1,14 @@
 CREATE TABLE club_chairs (
   user INTEGER REFERENCES users ON DELETE CASCADE ON UPDATE CASCADE,
   club INTEGER REFERENCES clubs ON DELETE RESTRICT ON UPDATE CASCADE,
-  is_approved INTEGER NOT NULL DEFAULT FALSE,
+  opo_approved INTEGER NOT NULL DEFAULT FALSE,
   PRIMARY KEY (user, club)
 ) STRICT;
 
 alter table club_leaders add column chair_approved INTEGER NOT NULL DEFAULT FALSE;
+
+-- for consistency...
+alter table club_leaders rename column is_approved to opo_approved;
+alter table certs_vehicles RENAME is_approved to opo_approved;
+alter table vehiclerequests rename is_approved to opo_approved;
+alter table trip_pcard_requests rename column is_approved to opo_approved;
