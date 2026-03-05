@@ -4,7 +4,7 @@ export function get(req, res) {
    FROM club_leaders
    LEFT JOIN clubs ON clubs.id = club_leaders.club
    LEFT JOIN users ON users.id = club_leaders.user
-   WHERE is_approved = 0
+   WHERE is_approved = 0 and chair_approved = 1
    `)
 
   const chair_requests = req.db.all(`

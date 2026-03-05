@@ -66,9 +66,12 @@ router.get('/opo/calendar', requireOpo, (_req, res) => {
 //TODO: change to club chair views...
 //TODO: add a "requireClubChair" verification. I think I can just call everything a "chair" and give others a chair-equivalent view?
 
+//TODO: these need to get moved lmao
 router.get('/chair/vehicle-requests', requireAnyChair, chairVehicleRequests.get)
 router.get('/chair/trip-approvals', requireAnyChair, chairTripApprovalsView.get)
 router.get('/chair/profile-approvals', requireAnyChair, chairProfileApprovals.get)
+
+
 router.get('/chair/calendar', requireAnyChair, (_req, res) => {
   res.render('views/chair/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
 })
@@ -173,6 +176,10 @@ router.delete(  '/opo/profile-approvals/certs/:req_id',     requireOpo, profileA
 router.put(     '/opo/profile-approvals/chair/:req_id',     requireOpo, profileApprovals.approveChairRequest)
 router.delete(  '/opo/profile-approvals/chair/:req_id',     requireOpo, profileApprovals.denyChairRequest)
 router.post(    '/opo/profile-approvals/search',            requireOpo, profileApprovals.searchUsers)
+
+router.put(     '/chair/profile-approvals/leaders/:req_id',   requireAnyChair, chairProfileApprovals.approveLeadershipRequest)
+router.delete(  '/chair/profile-approvals/leaders/:req_id',   requireAnyChair, chairProfileApprovals.denyLeadershipRequest)
+
 
 // Some components
 router.enableRender('components/save-button')

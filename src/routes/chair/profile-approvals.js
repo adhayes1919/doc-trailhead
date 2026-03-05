@@ -49,7 +49,7 @@ export function get(req, res) {
 export function approveLeadershipRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('UPDATE club_leaders SET is_approved = 1 WHERE rowid = ?', rowid)
+  req.db.run('UPDATE club_leaders SET chair_approved = 1 WHERE rowid = ?', rowid)
   return res.status(200).send('')
 }
 
@@ -60,31 +60,3 @@ export function denyLeadershipRequest(req, res) {
   return res.status(200).send('')
 }
 
-export function approveCertRequest(req, res) {
-  const rowid = req.params.req_id
-  if (!rowid) return res.sendStatus(400)
-  req.db.run('UPDATE certs_vehicles SET is_approved = 1 WHERE rowid = ?', rowid)
-  return res.status(200).send('')
-}
-
-export function denyCertRequest(req, res) {
-  const rowid = req.params.req_id
-  if (!rowid) return res.sendStatus(400)
-  req.db.run('DELETE FROM certs_vehicles WHERE rowid = ?', rowid)
-  return res.status(200).send('')
-}
-
-export function searchUsers(req, res) {
-  const search = req.body.search
-  if (!search?.length || search.length < 1) {
-    return res.send('<div id=search-results class=notice>Results will display here</div>')
-  }
-  const searchTerm = `%${search}%`
-  const users = req.db.all('SELECT id, name, email FROM users WHERE name like ?', searchTerm)
-
-  if (users.length > 100) {
-    return res.send('<div id=search-results class=notice>Too many results, keep typing to narrow them</div>')
-  }
-
-  return res.render('views/chair/user-search-results.njk', { users })
-}
