@@ -1,3 +1,6 @@
+import * as utils from "../../utils.js"
+import dateFormat from 'dateformat'
+
 export function get(req, res) {
   const leadership_requests = req.db.all(`
    SELECT club_leaders.rowid as req_id, users.name AS requester_name, clubs.name AS requested_item
@@ -16,13 +19,18 @@ export function get(req, res) {
    `)
 
   const active_chairs = req.db.all(`
-   SELECT club_chairs.rowid as chair_id, users.name AS user_name, clubs.name AS club_name
+   SELECT club_chairs.rowid as chair_id, chair_since, users.name AS user_name, clubs.name AS club_name
    FROM club_chairs
    LEFT JOIN clubs ON clubs.id = club_chairs.club
    LEFT JOIN users ON users.id = club_chairs.user
    WHERE opo_approved = 1 
    ORDER BY club_name
-   `)
+   `).map(row => {
+       const date = new Date(row.chair_since)
+       row.chair_since = dateFormat(date, "mm-dd-yyyy")
+       return row
+   })
+
 
   const cert_requests = req.db.all(`
    SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
@@ -64,12 +72,12 @@ export function denyCertRequest(req, res) {
 export function approveChairRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('UPDATE club_chairs SET opo_approved = 1 WHERE rowid = ?', rowid)
+  const today =  Math.floor(new Date().getTime())  //NOTE: this is actually so ugly and surely should use a better function...
+  req.db.run('UPDATE club_chairs SET opo_approved = 1, chair_since = ? WHERE rowid = ?', today, rowid) // TODO: time conversion
   return res.status(200).send('')
 }
 
 export function denyChairRequest(req, res) {
-    console.log("in deny?")
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
     //NOTE: this COULD have "AND opo_approved = 0" as a previous comment suggested, but then I would have to duplicate logic to have "deny" and "remove as club chair" which probbbbbably is better in practice but things happen....

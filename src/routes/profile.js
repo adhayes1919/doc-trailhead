@@ -71,7 +71,6 @@ function getProfileData(req, userId, hideControls) {
     user.medcert_type = certs_med.type
     const medcert_expiration_date = new Date(certs_med.expiration)
     user.medcert_expiration_date = medcert_expiration_date.toISOString().split('T')[0]; // for calendar view
-        console.log(user.medcert_expiration_date)
     user.medcert_expiration = dateFormat(medcert_expiration_date, "mm-dd-yyyy") // for table view
 
   }
@@ -381,9 +380,10 @@ export function postClubChairRequest(req, res) {
   const club = req.body.club
   if (!club) return res.sendStatus(400)
 
+  const today =  Math.floor(new Date().getTime())  //NOTE: this is actually so ugly and surely should use a better function...
   const opo_approved = res.locals.is_opo === true ? 1 : 0
-  req.db.run('INSERT INTO club_chairs (user, club, opo_approved) VALUES (?, ?, ?)',
-    userId, club, opo_approved)
+  req.db.run('INSERT INTO club_chairs (user, club, chair_since, opo_approved) VALUES (?, ?, ?, ?)',
+    userId, club, today, opo_approved)
   return getProfileCard(req, res)
 }
 export function deleteClubChairRequest(req, res) {
