@@ -26,6 +26,7 @@ import * as profileApprovals from './routes/opo/profile-approvals.js'
 
 import * as manageFleet from './routes/opo/manage-fleet.js'
 import * as manageClubs from './routes/opo/manage-clubs.js'
+import * as manageGear from './routes/opo/manage-gear.js'
 
 import * as authentication from './services/authentication.js'
 const { requireAuth, requireAnyLeader, requireTripLeader, requireOpo } = authentication
@@ -54,7 +55,11 @@ router.get('/all-trips', requireAuth, allTripsView.get)
 router.get('/opo/vehicle-requests', requireOpo, vehicleRequests.get)
 router.get('/opo/trip-approvals', requireOpo, tripApprovalsView.get)
 router.get('/opo/manage-fleet', requireOpo, manageFleet.get)
+<<<<<<< HEAD
 router.get('/opo/manage-clubs', requireOpo, manageClubs.get)
+=======
+router.get('/opo/manage-gear', requireOpo, manageGear.get)
+>>>>>>> gear-repo
 router.get('/opo/profile-approvals', requireOpo, profileApprovals.get)
 router.get('/leader/trip/:tripId', requireTripLeader, trip.getLeaderView)
 
@@ -142,6 +147,9 @@ router.put(     '/opo/group-gear/:tripId/approve',          requireOpo, gearAppr
 router.put(     '/opo/group-gear/:tripId/deny',             requireOpo, gearApprovals.denyGroupGear)
 router.put(     '/opo/group-gear/:tripId/reset',            requireOpo, gearApprovals.resetGroupGear)
 
+router.get(     '/opo/group-gear/:tripId/adjust',            requireOpo, gearApprovals.getAdjustGroupGear)
+router.put(     '/opo/group-gear/:tripId/adjust/:quantity',  requireOpo, gearApprovals.putAdjustGroupGear)
+
 router.put(     '/opo/pcard/:tripId/approve',               requireOpo, gearApprovals.approvePcard)
 router.put(     '/opo/pcard/:tripId/deny',                  requireOpo, gearApprovals.denyPcard)
 router.put(     '/opo/pcard/:tripId/reset',                 requireOpo, gearApprovals.resetPcard)
@@ -154,6 +162,8 @@ router.post(    '/opo/manage-clubs',                        requireOpo, manageCl
 //TODO: put vs post vs patch here?
 router.patch(  '/opo/manage-clubs/make-inactive/:id',                    requireOpo, manageClubs.makeInactive)
 router.patch(  '/opo/manage-clubs/make-active/:id',                    requireOpo, manageClubs.makeActive)
+router.post(    '/opo/manage-gear',                        requireOpo, manageGear.post)
+router.delete(  '/opo/manage-gear/:id',                    requireOpo, manageGear.del)
 
 router.put(     '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileApprovals.approveLeadershipRequest)
 router.delete(  '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileApprovals.denyLeadershipRequest)
