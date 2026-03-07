@@ -55,11 +55,8 @@ router.get('/all-trips', requireAuth, allTripsView.get)
 router.get('/opo/vehicle-requests', requireOpo, vehicleRequests.get)
 router.get('/opo/trip-approvals', requireOpo, tripApprovalsView.get)
 router.get('/opo/manage-fleet', requireOpo, manageFleet.get)
-<<<<<<< HEAD
 router.get('/opo/manage-clubs', requireOpo, manageClubs.get)
-=======
 router.get('/opo/manage-gear', requireOpo, manageGear.get)
->>>>>>> gear-repo
 router.get('/opo/profile-approvals', requireOpo, profileApprovals.get)
 router.get('/leader/trip/:tripId', requireTripLeader, trip.getLeaderView)
 
