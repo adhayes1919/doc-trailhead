@@ -50,7 +50,7 @@ export function approveVehicleRequest(req, res) {
     VALUES (@vehiclerequest, @requester, @pickup_time, @return_time, @vehicle, @vehicle_key,
       @response_index)
   `, assignments)
-  req.db.run('UPDATE vehiclerequests SET is_approved = true WHERE id = ?', vehiclerequest.id)
+  req.db.run('UPDATE vehiclerequests SET opo_approved = true WHERE id = ?', vehiclerequest.id)
 
   mailer.send(emails.getVehicleRequestProcessedEmail, req.db, vehiclerequest.trip)
   vehicleRequestView.renderVehicleRequestTable(req, res, vehiclerequest.id)
@@ -59,7 +59,7 @@ export function approveVehicleRequest(req, res) {
 export function denyVehicleRequest(req, res) {
   const vehicleRequestId = req.params.requestId
   if (!vehicleRequestId) return res.sendStatus(400)
-  req.db.run('UPDATE vehiclerequests SET is_approved = false WHERE id = ?', req.params.requestId)
+  req.db.run('UPDATE vehiclerequests SET opo_approved = false WHERE id = ?', req.params.requestId)
   req.db.run('DELETE FROM assignments WHERE vehiclerequest = ?', req.params.requestId)
 
   mailer.send(emails.getVehicleRequestDeniedEmail, req.db, vehicleRequestId)
@@ -68,7 +68,7 @@ export function denyVehicleRequest(req, res) {
 
 export function resetVehicleRequest(req, res) {
   if (!req.params.requestId) return res.sendStatus(400)
-  req.db.run('UPDATE vehiclerequests SET is_approved = null WHERE id = ?', req.params.requestId)
+  req.db.run('UPDATE vehiclerequests SET opo_approved = null WHERE id = ?', req.params.requestId)
   req.db.run('DELETE FROM assignments WHERE vehiclerequest = ?', req.params.requestId)
   vehicleRequestView.renderVehicleRequestTable(req, res, req.params.requestId)
 }
@@ -126,19 +126,19 @@ export function approvePcard(req, res) {
   const tripId = req.params.tripId
   const assigned_pcard = req.body.assigned_pcard
   if (!assigned_pcard) return res.sendStatus(400)
-  req.db.run('UPDATE trip_pcard_requests SET is_approved = true, assigned_pcard = ? WHERE trip = ?',
+  req.db.run('UPDATE trip_pcard_requests SET opo_approved = true, assigned_pcard = ? WHERE trip = ?',
     assigned_pcard, tripId)
   tripCard.renderLeaderCard(req, res, req.params.tripId, req.user)
 }
 
 export function denyPcard(req, res) {
   if (!req.params.tripId) return res.sendStatus(400)
-  req.db.run('UPDATE trip_pcard_requests SET is_approved = false WHERE trip = ?', req.params.tripId)
+  req.db.run('UPDATE trip_pcard_requests SET opo_approved = false WHERE trip = ?', req.params.tripId)
   tripCard.renderLeaderCard(req, res, req.params.tripId, req.user)
 }
 
 export function resetPcard(req, res) {
   if (!req.params.tripId) return res.sendStatus(400)
-  req.db.run('UPDATE trip_pcard_requests SET is_approved = null WHERE trip = ?', req.params.tripId)
+  req.db.run('UPDATE trip_pcard_requests SET opo_approved = null WHERE trip = ?', req.params.tripId)
   tripCard.renderLeaderCard(req, res, req.params.tripId, req.user)
 }

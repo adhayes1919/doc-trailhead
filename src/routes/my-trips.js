@@ -7,7 +7,7 @@ export function get(req, res) {
 
   const is_leader_query = `SELECT 1 as is_leader
                            FROM club_leaders 
-                           WHERE user = ? and is_approved = TRUE`
+                           WHERE user = ? and opo_approved = TRUE`
 
   const is_leader = req.db.get(is_leader_query, userId)?.is_leader === 1
 
