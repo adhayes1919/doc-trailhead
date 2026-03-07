@@ -24,12 +24,12 @@ export function get(req, res) {
    LEFT JOIN clubs ON clubs.id = club_chairs.club
    LEFT JOIN users ON users.id = club_chairs.user
    WHERE opo_approved = 1 
-   ORDER BY club_name
+   ORDER BY club_name, chair_since
    `).map(row => {
        const date = new Date(row.chair_since)
        row.chair_since = dateFormat(date, "mm-dd-yyyy")
        return row
-   })
+   }) // TODO: actually so ugly, not sure why I keep doing this...?
 
 
   const cert_requests = req.db.all(`
@@ -73,14 +73,13 @@ export function approveChairRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
   const today =  Math.floor(new Date().getTime())  //NOTE: this is actually so ugly and surely should use a better function...
-  req.db.run('UPDATE club_chairs SET opo_approved = 1, chair_since = ? WHERE rowid = ?', today, rowid) // TODO: time conversion
+  req.db.run('UPDATE club_chairs SET opo_approved = 1, chair_since = ? WHERE rowid = ?', today, rowid) 
   return res.status(200).send('')
 }
 
 export function denyChairRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-    //NOTE: this COULD have "AND opo_approved = 0" as a previous comment suggested, but then I would have to duplicate logic to have "deny" and "remove as club chair" which probbbbbably is better in practice but things happen....
   req.db.run('DELETE FROM club_chairs WHERE rowid = ?', rowid)
   return res.status(200).send('')
 }
