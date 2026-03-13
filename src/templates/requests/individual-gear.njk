@@ -18,6 +18,12 @@
         <option value=Height>Height
       </select>
 
+      <input name=notes type=text placeholder="notes">
+      <label for="optional"> Gear Optional? 
+        <input id=optional name=optional type=checkbox >
+Gear Name
+      </label>
+
       <button class=close-button type=button onclick="this.parentElement.remove()">
         <img alt="Close Icon" src="/static/icons/close-icon.svg">
       </button>
@@ -41,6 +47,7 @@
                 hx-confirm="Are you sure you want to delete {{gear.name}} from the list of required gear? This will remove it from all trippee gear requests as well." >
           <img alt="Close Icon" src="/static/icons/close-icon.svg">
         </button>
+        <textarea> {{ gear.notes }} </textarea>
       </li>
       {% endfor %}
     </ul>

@@ -11,7 +11,7 @@
         {% endfor %}
         </select>
 
-
+      <input name=notes type=text placeholder="notes">
       <input type=number name=quantity min=1 value=1 required>
       <button class=close-button type=button onclick="this.parentElement.remove()">
         <img alt="Close Icon" src="/static/icons/close-icon.svg">
@@ -22,6 +22,7 @@
   <form class=group-gear-form hx-put="/trip/{{ trip_id }}/group-gear">
   <h1>Group Gear</h1>
 
+  <!--TODO: prolly gonna turn this into a table lowkey -->
   <div class=gear-row>
     <ul>
       {% for gear in group_gear %}
@@ -32,6 +33,7 @@
                 hx-confirm="Are you sure you want to delete {{gear.name}} from the list of required gear? This will remove it from all trippee gear requests as well." >
           <img alt="Close Icon" src="/static/icons/close-icon.svg">
         </button>
+        <textarea> {{ gear.notes }} </textarea>
       </li>
       {% endfor %}
     </ul>

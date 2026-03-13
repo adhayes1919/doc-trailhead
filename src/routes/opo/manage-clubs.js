@@ -5,6 +5,7 @@ export function get(req, res) {
 }
 
 // insert new club
+// TODO: make case insensitive
 export function post(req, res) {
   const { name } = req.body
   req.db.run(
