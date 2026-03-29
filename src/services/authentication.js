@@ -100,6 +100,7 @@ export function requireTripLeader(req, res, next) {
       FROM trip_members WHERE user = ? AND trip = ? AND leader = 1
     `, req.user, tripId)?.is_leader === 1
 
+      //NOTE: this probably shouldn't be here? come back and check if the local var is enough?
     const isChair = req.db.get(`
       SELECT 1 as is_chair FROM club_chairs     
         WHERE 
@@ -109,7 +110,6 @@ export function requireTripLeader(req, res, next) {
     `, req.user, tripId)?.is_chair === 1
 
     // Set a variable that says the current use is a leader for THIS trip
-      // NOTE: this was commented out and i cannNOT remember if i did that or not...
     if (isLeader) res.locals.is_leader_for_trip = true
     if (res.locals.is_opo === true || isChair || isLeader) return next()
 

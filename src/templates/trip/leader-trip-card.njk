@@ -105,6 +105,7 @@ on time. 48 hours before trip-start you can begin checking out your trip.
     </ul>
   </td>
   <td>
+  {% if (is_opo or is_leader_for_trip ) %} 
     <div class=member-buttons-container>
       <button class="action edit"
               hx-put="/trip/{{ trip_id }}/waitlist/{{ member.id }}"
@@ -120,6 +121,7 @@ on time. 48 hours before trip-start you can begin checking out your trip.
       <button class="action edit" hx-put="/trip/{{ trip_id }}/leader/{{ member.id }}">Make leader</button>
       {% endif %}
     </div>
+    {% endif %}
 </tr>
 {% endfor %}
 </table>

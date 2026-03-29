@@ -1,10 +1,13 @@
 import * as utils from '../../utils.js'
 
 const _60_DAYS_IN_MS = 5184000000
-const OPO_TRIPS_QUERY = `
-    SELECT trips.id,
+//NOTE: not clubid is literally used at all but such is life
+const CLUB_CHAIR_TRIPS_QUERY = `
+    SELECT 
+      trips.id,
       title,
       clubs.id as clubid, 
+      clubs.name as clubname, 
       location,
       start_time,
       users.name as owner,
@@ -60,19 +63,17 @@ export function get(req, res) {
   // TODO: handle when lists are empty
 
   const past_trips = req.db.all(
-    `${OPO_TRIPS_QUERY}
+    `${CLUB_CHAIR_TRIPS_QUERY}
     WHERE start_time > @low_time
       AND start_time < @high_time
-      AND (mg_status != 'N/A' OR gg_status != 'N/A' OR pc_status != 'N/A' OR vr_status != 'N/A')
       AND clubid in (${clubIds.join(',')})
     ORDER BY start_time DESC`,
     { low_time: pastTimeWindow.getTime(), high_time: now.getTime() }
   ).map(convertToRow)
 
   const future_trips = req.db.all(
-    `${OPO_TRIPS_QUERY}
+    `${CLUB_CHAIR_TRIPS_QUERY}
     WHERE start_time > ?
-      AND (mg_status != 'N/A' OR gg_status != 'N/A' OR pc_status != 'N/A' OR vr_status != 'N/A')
       AND clubid in (${clubIds.join(',')})
     ORDER BY start_time ASC`,
     now.getTime()
@@ -82,9 +83,11 @@ export function get(req, res) {
 }
 
 function convertToRow(trip) {
+    console.log(trip)
   return {
     id: trip.id,
     title: trip.title,
+    clubname: trip.clubname,
     owner: trip.owner,
     start_time_element: utils.getDatetimeElement(trip.start_time),
     mg_status_element: utils.getBadgeImgElement(trip.mg_status),
