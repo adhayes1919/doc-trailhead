@@ -10,7 +10,11 @@
 <section class="pending info-card">
         <h1>Pending Trips </h1>
         You are a chair in:
-            {%for name in club_names%} {{name}} {%endfor%} </h1>
+        {%for name in club_names%} 
+            {{name}} 
+            {%if not loop.last%},{% endif %} 
+        {%endfor%} 
+
 {% if future_trips.length === 0 %}
 <div class=notice>All set for now</div>
 {% else %}

@@ -11,9 +11,9 @@ export function get(req, res) {
     WHERE user = ? AND opo_approved = 1
     ORDER BY name
   `, userId)
-    const clubIds = userChairIn.map(({ id }) => id);
+  const clubIds = userChairIn.map(({ id }) => id)
 
-    //TODO: note the medcert naming inconsistencies
+  // TODO: note the medcert naming inconsistencies
   const leadership_requests = req.db.all(`
    SELECT 
     club_leaders.rowid as req_id, 
@@ -28,18 +28,18 @@ export function get(req, res) {
    LEFT JOIN certs_med ON certs_med.user = club_leaders.user
    WHERE opo_approved = 0 AND chair_approved = 0 AND clubid in (${clubIds.join(',')})
    `).map(row => {
-      if (!row.medcert_expiration) {
-        row.medcert_expiration = null;
-        return row;
-      }
-      const date = new Date(row.medcert_expiration);
-      if (isNaN(date.getTime())) {
-        row.medcert_expiration = null;
-        return row;
-      }
-      row.medcert_expiration = dateFormat(date, "mm-dd-yyyy");
-      return row;
-      })
+    if (!row.medcert_expiration) {
+      row.medcert_expiration = null
+      return row
+    }
+    const date = new Date(row.medcert_expiration)
+    if (isNaN(date.getTime())) {
+      row.medcert_expiration = null
+      return row
+    }
+    row.medcert_expiration = dateFormat(date, 'mm-dd-yyyy')
+    return row
+  })
 
   return res.render('views/chair/profile-approvals.njk', { leadership_requests })
 }
@@ -57,4 +57,3 @@ export function denyLeadershipRequest(req, res) {
   req.db.run('DELETE FROM club_leaders WHERE rowid = ?', rowid)
   return res.status(200).send('')
 }
-

@@ -67,13 +67,6 @@ router.get('/chair/vehicle-requests', requireAnyChair, chairVehicleRequests.get)
 router.get('/chair/trip-approvals', requireAnyChair, chairTripApprovalsView.get)
 router.get('/chair/profile-approvals', requireAnyChair, chairProfileApprovals.get)
 
-//TODO: decide if this has any use tbh
-router.get('/chair/calendar', requireAnyChair, (_req, res) => {
-  res.render('views/chair/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
-})
-
-
-
 
 /**********************
  * User Profile Routes
@@ -175,7 +168,6 @@ router.post(    '/opo/profile-approvals/search',            requireOpo, profileA
 
 router.put(     '/chair/profile-approvals/leaders/:req_id',   requireAnyChair, chairProfileApprovals.approveLeadershipRequest)
 router.delete(  '/chair/profile-approvals/leaders/:req_id',   requireAnyChair, chairProfileApprovals.denyLeadershipRequest)
-
 
 // Some components
 router.enableRender('components/save-button')

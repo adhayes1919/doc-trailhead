@@ -34,16 +34,14 @@ const OPO_TRIPS_QUERY = `
       ON gg.trip = trips.id
 `
 
-
 export function get(req, res) {
   const now = new Date()
   const pastTimeWindow = new Date(now.getTime() - _60_DAYS_IN_MS)
 
-
   const userId = parseInt(req.user)
 
-    //TODO: naming...
-    //TODO: should be a function tbh
+  // TODO: naming...
+  // TODO: should be a function tbh
   const userChairIn = req.db.all(`
     SELECT 
         clubs.id,
@@ -54,13 +52,12 @@ export function get(req, res) {
     ORDER BY name
   `, userId)
 
-    //TODO: literally cannot comprehend naming conventions here
-    const clubIds = userChairIn.map(({ id }) => id);
-    const club_names = userChairIn.map(({ name }) => name);
+  // TODO: literally cannot comprehend naming conventions here
+  const clubIds = userChairIn.map(({ id }) => id)
+  const club_names = userChairIn.map(({ name }) => name)
 
-    //TODO: move the string-ing to here...
-    //TODO: handle when lists are empty
-
+  // TODO: move the string-ing to here...
+  // TODO: handle when lists are empty
 
   const past_trips = req.db.all(
     `${OPO_TRIPS_QUERY}
@@ -68,8 +65,8 @@ export function get(req, res) {
       AND start_time < @high_time
       AND (mg_status != 'N/A' OR gg_status != 'N/A' OR pc_status != 'N/A' OR vr_status != 'N/A')
       AND clubid in (${clubIds.join(',')})
-    ORDER BY start_time DESC`, 
-    { low_time: pastTimeWindow.getTime(), high_time: now.getTime()}
+    ORDER BY start_time DESC`,
+    { low_time: pastTimeWindow.getTime(), high_time: now.getTime() }
   ).map(convertToRow)
 
   const future_trips = req.db.all(

@@ -2,7 +2,6 @@ import { BadRequestError, NotFoundError } from '../request/errors.js'
 import dateFormat from 'dateformat'
 import * as utils from '../utils.js'
 
-
 export function getProfileView(req, res) {
   if (req.query.card) {
     return getProfileCard(req, res)
@@ -58,21 +57,20 @@ function getProfileData(req, userId, hideControls) {
   const user = req.db.get('SELECT * FROM users WHERE id = ?', userId)
   if (!user) throw new NotFoundError(`User ${userId} not found`)
 
-    //TODO: "SELECT cert" could probably become vehicle type but literally no desire to make that happen
+  // TODO: "SELECT cert" could probably become vehicle type but literally no desire to make that happen
   const certs_vehicles = req.db
     .all('SELECT cert, opo_approved FROM certs_vehicles WHERE user = ?', userId)
     .map(item => `${item.cert}${item.opo_approved === 0 ? ' (pending)' : ''}`)
     .join(', ')
 
-    //TODO: error checking / if statement here
-    //TODO:  make a function for this...
+  // TODO: error checking / if statement here
+  // TODO:  make a function for this...
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (certs_med) {
     user.medcert_type = certs_med.type
     const medcert_expiration_date = new Date(certs_med.expiration)
-    user.medcert_expiration_date = medcert_expiration_date.toISOString().split('T')[0]; // for calendar view
-    user.medcert_expiration = dateFormat(medcert_expiration_date, "mm-dd-yyyy") // for table view
-
+    user.medcert_expiration_date = medcert_expiration_date.toISOString().split('T')[0] // for calendar view
+    user.medcert_expiration = dateFormat(medcert_expiration_date, 'mm-dd-yyyy') // for table view
   }
 
   if (user.shoe_size) {
@@ -85,7 +83,7 @@ function getProfileData(req, userId, hideControls) {
   user.inches = user.height_inches % 12
   user.height = `${user.feet}'${user.inches}"`
 
-    //NOTE: this sohuld reasonably become vehicle certifications as well (imo)
+  // NOTE: this sohuld reasonably become vehicle certifications as well (imo)
   user.driver_certifications = certs_vehicles.length > 0 ? certs_vehicles : 'none'
   user.leader_for = req.db.get(`
     SELECT group_concat(
@@ -140,24 +138,22 @@ export function put(req, res) {
     WHERE id = @user_id
   `, formData)
 
+  // TODO: forgive me for what I'm about to do...
 
-    //TODO: forgive me for what I'm about to do...
+  // TODO: check html vs js naming conventions...
 
-    //TODO: check html vs js naming conventions...
-
-
-    //TODO: prolly need to clean this or sum
+  // TODO: prolly need to clean this or sum
   const medcert_type = formData.medcert_type
   const medcert_expiration = new Date(formData.medcert_expiration).getTime()
 
-  if (medcert_type && medcert_expiration) { 
-        //TODO: some "else {}" for an error
-        //NOTE: also might not have needed all this but eh
-        //NOTE: some places have 'user_id' and some have 'userId'...
-        //TODO: this could probably (maybe?) become a seperate function
-    req.db.run(` INSERT or IGNORE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) `, formData.user_id, medcert_type, medcert_expiration)
+  if (medcert_type && medcert_expiration) {
+    // TODO: some "else {}" for an error
+    // NOTE: also might not have needed all this but eh
+    // NOTE: some places have 'user_id' and some have 'userId'...
+    // TODO: this could probably (maybe?) become a seperate function
+    req.db.run(' INSERT or IGNORE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) ', formData.user_id, medcert_type, medcert_expiration)
   }
-    
+
   if (formData.new_user === 'true') {
     res.set('HX-Redirect', '/all-trips')
     return res.sendStatus(200)
@@ -167,7 +163,7 @@ export function put(req, res) {
 }
 
 const VALID_VEHICLE_CERTS = ['VAN', 'MINIVAN', 'TRAILER']
-//TODO: driver -> vehicle
+// TODO: driver -> vehicle
 export function getDriverCertRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
@@ -194,7 +190,7 @@ export function getDriverCertRequest(req, res) {
   res.send(form).status(200)
 }
 
-//TODO: same as all the other TODOs...
+// TODO: same as all the other TODOs...
 export function postDriverCertRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
@@ -224,11 +220,11 @@ export function getClubLeadershipRequest(req, res) {
   const userId = parseInt(req.params.userId)
 
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
-  
-  //NOTE: should I bother...?
-  //TODO: this is in the wrong branch lmfao
-    //kindaaa don't feel like fixing that, it'll ultimately be part of this anyway...
-  
+
+  // NOTE: should I bother...?
+  // TODO: this is in the wrong branch lmfao
+  // kindaaa don't feel like fixing that, it'll ultimately be part of this anyway...
+
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (!certs_med) {
     const disclaimer = `
@@ -239,7 +235,7 @@ export function getClubLeadershipRequest(req, res) {
   <button class="action deny" hx-get="/profile/${userId}?card=true">Cancel</button>
 </div>
     `
-        res.send(disclaimer).status(200)
+    res.send(disclaimer).status(200)
   }
 
   const userClubs = req.db.all(`
@@ -315,29 +311,10 @@ export function getClubChairRequest(req, res) {
   const userId = parseInt(req.params.userId)
 
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
+  // TODO: gotta change this to allow things like poco...
 
 
-    //TODO: gotta change this to allow things like poco...
-  const userLeader = req.db.all(`
-    SELECT clubs.id, name, opo_approved
-    FROM club_leaders
-    LEFT JOIN clubs ON clubs.id = club_leaders.club
-    WHERE user = ?
-    ORDER BY name
-  `, userId)
-
-  if (!userLeader) {
-    const disclaimer = `
-<div>
-  <div class="warn-message">
-    You are not currently a leader in any clubs. Please request club leadership before chair priviledges.
-  </div>
-  <button class="action deny" hx-get="/profile/${userId}?card=true">Cancel</button>
-</div>
-    `
-        res.send(disclaimer).status(200)
-  }
-
+    //NOTE: i do nottt like this var name ngl
   const userClubs = req.db.all(`
     SELECT clubs.id, name, opo_approved
     FROM club_chairs
@@ -346,7 +323,17 @@ export function getClubChairRequest(req, res) {
     ORDER BY name
   `, userId)
 
-
+    //NOTE: also doing two of these queries feels strange?
+  const clubsWithoutUser = req.db.all(`
+    SELECT id, name
+    FROM clubs
+    WHERE active = 1 AND NOT EXISTS
+      (SELECT *
+      FROM club_chairs AS chair
+      WHERE user = ? AND chair.club = clubs.id
+      )
+    ORDER BY name
+  `, userId)
 
   const clubListItems = userClubs.map(club => `
   <li>${club.name}${club.opo_approved === 0 ? ' (pending)' : ''}
@@ -357,12 +344,13 @@ export function getClubChairRequest(req, res) {
           hx-swap="outerHTML"
   ><img src="/static/icons/close-icon.svg"></button>
   `)
-  const options = userLeader.map(club => `<option value=${club.id}>${club.name}</option>`)
+  const options = clubsWithoutUser.map(club => `<option value=${club.id}>${club.name}</option>`)
+    //TODO: rename css class...
   const form = `
 <form hx-boost=true
       hx-push-url=false
       action=/profile/${userId}/club-chair
-      method=post class="club-chair-request">
+      method=post class="club-leadership-request">
 <ul>${clubListItems.join(' ')}</ul>
 <div>
   <select name=club>${options}</select>
@@ -380,7 +368,7 @@ export function postClubChairRequest(req, res) {
   const club = req.body.club
   if (!club) return res.sendStatus(400)
 
-  const today =  Math.floor(new Date().getTime())  //NOTE: this is actually so ugly and surely should use a better function...
+  const today = Math.floor(new Date().getTime()) // NOTE: this is actually so ugly and surely should use a better function...
   const opo_approved = res.locals.is_opo === true ? 1 : 0
   req.db.run('INSERT INTO club_chairs (user, club, chair_since, opo_approved) VALUES (?, ?, ?, ?)',
     userId, club, today, opo_approved)

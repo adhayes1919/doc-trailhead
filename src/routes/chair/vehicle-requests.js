@@ -8,7 +8,7 @@ export function get(req, res) {
   res.render('views/chair/vehicle-requests.njk', { reviewed_requests, pending_requests })
 }
 
-// set some constant "club" and have "where user = chair of" 
+// set some constant "club" and have "where user = chair of"
 
 function getVehicleRequests(req) {
   const now = new Date()

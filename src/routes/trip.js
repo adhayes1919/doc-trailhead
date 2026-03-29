@@ -1,4 +1,4 @@
-//NOTE:: ??
+// NOTE:: ??
 /* If you're looking for the method to create a trip, that's in /rest/trip.js */
 import * as utils from '../utils.js'
 import * as tripCard from './trip/trip-card.js'
@@ -37,7 +37,7 @@ export function getLeaderView(req, res) {
   const is_opo = req.db.isOpo(req.user)
   const is_leader = req.db.isLeaderForTrip(tripId, req.user)
 
-    const isChair = req.db.get(`
+  const isChair = req.db.get(`
       SELECT 1 as is_chair FROM club_chairs     
         WHERE 
           user = ? AND 
@@ -181,8 +181,6 @@ export function deleteTrip(req, res) {
   if (!tripId || tripId < 1) return res.sendStatus(400)
 
   const trip = req.db.get('SELECT id, title, returned, start_time FROM trips WHERE id = ?', tripId)
-  console.log(trip)
-
   if (trip.returned) {
     throw new BadRequestError('Cannot delete trips that have already returned')
   }

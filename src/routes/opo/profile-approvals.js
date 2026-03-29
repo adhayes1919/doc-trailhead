@@ -1,4 +1,4 @@
-import * as utils from "../../utils.js"
+import * as utils from '../../utils.js'
 import dateFormat from 'dateformat'
 
 export function get(req, res) {
@@ -26,11 +26,10 @@ export function get(req, res) {
    WHERE opo_approved = 1 
    ORDER BY club_name, chair_since
    `).map(row => {
-       const date = new Date(row.chair_since)
-       row.chair_since = dateFormat(date, "mm-dd-yyyy")
-       return row
-   }) // TODO: actually so ugly, not sure why I keep doing this...?
-
+    const date = new Date(row.chair_since)
+    row.chair_since = dateFormat(date, 'mm-dd-yyyy')
+    return row
+  }) // TODO: actually so ugly, not sure why I keep doing this...?
 
   const cert_requests = req.db.all(`
    SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
@@ -72,8 +71,8 @@ export function denyCertRequest(req, res) {
 export function approveChairRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  const today =  Math.floor(new Date().getTime())  //NOTE: this is actually so ugly and surely should use a better function...
-  req.db.run('UPDATE club_chairs SET opo_approved = 1, chair_since = ? WHERE rowid = ?', today, rowid) 
+  const today = Math.floor(new Date().getTime()) // NOTE: this is actually so ugly and surely should use a better function...
+  req.db.run('UPDATE club_chairs SET opo_approved = 1, chair_since = ? WHERE rowid = ?', today, rowid)
   return res.status(200).send('')
 }
 
