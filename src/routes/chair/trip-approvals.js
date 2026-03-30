@@ -83,7 +83,6 @@ export function get(req, res) {
 }
 
 function convertToRow(trip) {
-    console.log(trip)
   return {
     id: trip.id,
     title: trip.title,

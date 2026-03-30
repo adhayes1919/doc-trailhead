@@ -15,6 +15,12 @@
 </section>
 
 <section class="trips">
+  {% if medcert_expiring_soon %}
+    <div class="warn-message">
+        Please note your medcert is set to expire soon. You will lose the ability to create trips if you do not update it before {{ medcert_expiration_date }}
+    </div>
+  {% endif %}
+
   {% if can_create_trip %}
   <a href="/create-trip" class="trip-card new-trip">
     <h2>Create a Trip</h2>

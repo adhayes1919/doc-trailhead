@@ -1,4 +1,7 @@
 import * as utils from '../utils.js'
+import dateFormat from 'dateformat'
+
+const _60_DAYS_IN_MS = 5184000000
 
 export function get(req, res) {
   const userId = req.user
@@ -25,6 +28,19 @@ export function get(req, res) {
           AND end_time > ?
         ORDER BY start_time ASC
       `
+    //TODO: prolly not needed to do db.all here...
+    //NOTE: most of this can prolly get cleaned up?
+  const userMedcert = req.db.all('SELECT expiration from certs_med where user = ?', userId)
+  const today = new Date().getTime()
+
+  //const date = new Date()
+  //date.setMonth(date.getMonth() +1)
+  //const oneMonthFromNow = date.getTime();
+  const medcertExpiringSoon = (today + _60_DAYS_IN_MS) > userMedcert[0].expiration 
+  console.log(today + _60_DAYS_IN_MS) 
+    console.log(`is medcert exipring soon? : ${medcertExpiringSoon}`)
+  
+  
 
   const trips = req.db.all(tripsQuery, userId, now.getTime() - _24_HOURS_IN_MS)
     .map(trip => ({
@@ -35,6 +51,8 @@ export function get(req, res) {
 
   res.render('views/my-trips.njk', {
     trips,
+    medcert_expiring_soon : medcertExpiringSoon,
+    medcert_expiration_date : dateFormat(userMedcert[0].expiration, 'mm-dd-yyyy'),
     can_create_trip
   })
 }
