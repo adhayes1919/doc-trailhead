@@ -15,7 +15,7 @@
 <div class=trip-table-overflow-wrapper>
 <table class=trip-table>
   <thead>
-    <tr><th>Trip #<th>Trip <th>Start Time<th>Owner<th>Indiv. Gear<th>Group Gear<th>Vehicles<th>P-Card</tr>
+    <tr><th>Trip #<th>Trip <th>Start Time<th>Owner<th>Valid Medcerts<th>Indiv. Gear<th>Group Gear<th>Vehicles<th>P-Card</tr>
   </thead>
   <tbody>
   {% for trip in future_trips %}
@@ -24,6 +24,7 @@
     <td><a href="/leader/trip/{{trip.id}}">{{trip.title}}</a>
     <td>{{trip.start_time_element | safe }}
     <td>{{trip.owner}}
+    <td>{{trip.medcert_status_element| safe }}
     <td>{{trip.mg_status_element | safe }}
     <td>{{trip.gg_status_element | safe }}
     <td>{{trip.vr_status_element | safe }}
@@ -45,7 +46,7 @@
 <div class=trip-table-overflow-wrapper>
 <table class=trip-table>
   <thead>
-    <tr><th>Trip #<th>Trip <th>Start Time<th>Owner<th>Indiv. Gear<th>Group Gear<th>Vehicles<th>P-Card</tr>
+    <tr><th>Trip #<th>Trip <th>Start Time<th>Owner<th>Valid Medcerts<th>Indiv. Gear<th>Group Gear<th>Vehicles<th>P-Card</tr>
   </thead>
   <tbody>
   {% for trip in past_trips %}
@@ -54,6 +55,7 @@
     <td><a href="/leader/trip/{{trip.id}}">{{trip.title}}</a>
     <td>{{trip.start_time_element | safe }}
     <td>{{trip.owner}}
+    <td>{{trip.medcert_status_element| safe }}
     <td>{{trip.mg_status_element | safe }}
     <td>{{trip.gg_status_element | safe }}
     <td>{{trip.vr_status_element | safe }}
