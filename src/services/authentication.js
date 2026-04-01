@@ -78,8 +78,7 @@ export function requireAnyChair(req, res, next) {
     if (res.locals.is_opo === true) return next()
 
     const isChair = req.db.get(`
-      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and opo_approved = TRUE`,
-    req.user)?.is_chair >= 1
+      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and opo_approved = TRUE`, req.user)?.is_chair >= 1
     if (isChair) return next()
     return res.sendStatus(403)
   })
