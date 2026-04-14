@@ -196,8 +196,6 @@ export function getClubLeadershipRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
 
-  // NOTE: should I bother...?
-
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (!certs_med) {
     const disclaimer = `

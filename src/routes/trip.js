@@ -1,4 +1,3 @@
-//NOTE:: ??
 /* If you're looking for the method to create a trip, that's in /rest/trip.js */
 import * as utils from '../utils.js'
 import * as tripCard from './trip/trip-card.js'
