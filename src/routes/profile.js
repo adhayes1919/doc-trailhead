@@ -1,7 +1,6 @@
 import { BadRequestError, NotFoundError } from '../request/errors.js'
 import dateFormat from 'dateformat'
 
-
 export function getProfileView(req, res) {
   if (req.query.card) {
     return getProfileCard(req, res)
@@ -57,20 +56,16 @@ function getProfileData(req, userId, hideControls) {
   const user = req.db.get('SELECT * FROM users WHERE id = ?', userId)
   if (!user) throw new NotFoundError(`User ${userId} not found`)
 
-    //TODO: "SELECT cert" could probably become vehicle type but literally no desire to make that happen
   const certs_vehicles = req.db
     .all('SELECT cert, is_approved FROM certs_vehicles WHERE user = ?', userId)
     .map(item => `${item.cert}${item.is_approved === 0 ? ' (pending)' : ''}`)
     .join(', ')
 
-    //TODO: error checking / if statement here
-    //NOTE: certs_med or cert_med? cert make sense logically (one cert per person) but certs makes sense structurally (certs_vehicles already exists)
-    //TODO:  make a function for this...
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (certs_med) {
     user.medcert_type = certs_med.type
     const medcert_expiration_date = new Date(certs_med.expiration)
-    user.medcert_expiration = dateFormat(medcert_expiration_date, "mm-dd-yyyy")
+    user.medcert_expiration = dateFormat(medcert_expiration_date, 'mm-dd-yyyy')
   }
 
   if (user.shoe_size) {
@@ -83,7 +78,6 @@ function getProfileData(req, userId, hideControls) {
   user.inches = user.height_inches % 12
   user.height = `${user.feet}'${user.inches}"`
 
-    //NOTE: this sohuld reasonably become vehicle certifications as well (imo)
   user.driver_certifications = certs_vehicles.length > 0 ? certs_vehicles : 'none'
   user.leader_for = req.db.get(`
     SELECT group_concat(
@@ -128,24 +122,15 @@ export function put(req, res) {
     WHERE id = @user_id
   `, formData)
 
-
-    //TODO: forgive me for what I'm about to do...
-
-    //TODO: check html vs js naming conventions...
-
-
-    //TODO: prolly need to clean this or sum
   const medcert_type = formData.medcert_type
   const medcert_expiration = new Date(formData.medcert_expiration).getTime()
-
-  if (medcert_type && medcert_expiration) { 
-        //TODO: some "else {}" for an error
-        //NOTE: also might not have needed all this but eh
-        //NOTE: some places have 'user_id' and some have 'userId'...
-        //TODO: this could probably (maybe?) become a seperate function
-    req.db.run(` INSERT or IGNORE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) `, formData.user_id, medcert_type, medcert_expiration)
+  if (medcert_type && medcert_expiration) {
+    req.db.run(`
+    INSERT or IGNORE INTO certs_med 
+    (user, type, expiration) VALUES (?, ?, ?) 
+    `, formData.user_id, medcert_type, medcert_expiration)
   }
-    
+
   if (formData.new_user === 'true') {
     res.set('HX-Redirect', '/all-trips')
     return res.sendStatus(200)
@@ -155,7 +140,7 @@ export function put(req, res) {
 }
 
 const VALID_VEHICLE_CERTS = ['VAN', 'MINIVAN', 'TRAILER']
-//TODO: driver -> vehicle
+// TODO: driver -> vehicle
 export function getDriverCertRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
@@ -165,7 +150,7 @@ export function getDriverCertRequest(req, res) {
   const checkboxes = VALID_VEHICLE_CERTS.map(cert => {
     const userCert = driver_certs.find(item => item.cert === cert)
     const attributes = userCert ? `checked ${userCert.is_approved && !res.locals.is_opo ? 'disabled ' : ''}` : ''
-    return `<label><input ${attributes}type=checkbox name=cert value=${cert}></input>${cert}</label>`
+    return `<label><input ${attributes}type=checkbox name=vehicle_cert value=${cert}></input>${cert}</label>`
   })
   const form = `
 <form hx-boost=true
@@ -182,7 +167,6 @@ export function getDriverCertRequest(req, res) {
   res.send(form).status(200)
 }
 
-//TODO: same as all the other TODOs...
 export function postDriverCertRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
@@ -192,13 +176,13 @@ export function postDriverCertRequest(req, res) {
   req.db.run(`DELETE FROM certs_vehicles WHERE user = ? ${!res.locals.is_opo ? 'and is_approved = 0' : ''}`, userId)
 
   // If the body is empty, that means the user has removed their certs, and we're done
-  if (!req.body.cert) return getProfileCard(req, res)
+  if (!req.body.vehicle_cert) return getProfileCard(req, res)
 
   // body-parser weirdness: if there's a single value it's a string, if there's multiple it's an
   // array of strings
   const is_approved = res.locals.is_opo === true ? 1 : 0
-  const certs_vehicles = typeof req.body.cert === 'string' ? [req.body.cert] : req.body.cert
-  certs
+  const certs_vehicles = typeof req.body.vehicle_cert === 'string' ? [req.body.vehicle_cert] : req.body.vehicle_cert
+  certs_vehicles
     .filter(cert => VALID_VEHICLE_CERTS.includes(cert))
     .map(cert => req.db.run(
       'INSERT OR IGNORE INTO certs_vehicles (user, cert, is_approved) VALUES (?, ?, ?)',
@@ -211,9 +195,9 @@ export function postDriverCertRequest(req, res) {
 export function getClubLeadershipRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
-  
-  //NOTE: should I bother...?
-  
+
+  // NOTE: should I bother...?
+
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (!certs_med) {
     const disclaimer = `
@@ -224,10 +208,8 @@ export function getClubLeadershipRequest(req, res) {
   <button class="action deny" hx-get="/profile/${userId}?card=true">Cancel</button>
 </div>
     `
-        res.send(disclaimer).status(200)
+    res.send(disclaimer).status(200)
   }
-  
-
 
   const userClubs = req.db.all(`
     SELECT clubs.id, name, is_approved
