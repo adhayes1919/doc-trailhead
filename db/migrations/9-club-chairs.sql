@@ -9,7 +9,7 @@ CREATE TABLE club_chairs (
 alter table club_leaders add column chair_approved INTEGER NOT NULL DEFAULT FALSE;
 
 -- for consistency...
-alter table club_leaders rename column is_approved to opo_approved;
+alter table club_leaders RENAME column is_approved to opo_approved;
 alter table certs_vehicles RENAME is_approved to opo_approved;
-alter table vehiclerequests rename is_approved to opo_approved;
-alter table trip_pcard_requests rename column is_approved to opo_approved;
+alter table vehiclerequests RENAME is_approved to opo_approved;
+alter table trip_pcard_requests RENAME column is_approved to opo_approved;
