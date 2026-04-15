@@ -57,8 +57,8 @@ function getProfileData(req, userId, hideControls) {
   if (!user) throw new NotFoundError(`User ${userId} not found`)
 
   const certs_vehicles = req.db
-    .all('SELECT cert, is_approved FROM certs_vehicles WHERE user = ?', userId)
-    .map(item => `${item.cert}${item.is_approved === 0 ? ' (pending)' : ''}`)
+    .all('SELECT cert, opo_approved FROM certs_vehicles WHERE user = ?', userId)
+    .map(item => `${item.cert}${item.opo_approved === 0 ? ' (pending)' : ''}`)
     .join(', ')
 
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
@@ -81,7 +81,7 @@ function getProfileData(req, userId, hideControls) {
   user.driver_certifications = certs_vehicles.length > 0 ? certs_vehicles : 'none'
   user.leader_for = req.db.get(`
     SELECT group_concat(
-      iif(is_approved = 1, name, name || ' (pending)'),
+      iif(opo_approved = 1, name, name || ' (pending)'),
       ', '
     ) as clubs
     FROM club_leaders
@@ -146,10 +146,10 @@ export function getDriverCertRequest(req, res) {
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
 
   // TODO this is a little gnarly and could be cleaned up
-  const driver_certs = req.db.all('SELECT cert, is_approved FROM certs_vehicles WHERE user = ?', userId)
+  const driver_certs = req.db.all('SELECT cert, opo_approved FROM certs_vehicles WHERE user = ?', userId)
   const checkboxes = VALID_VEHICLE_CERTS.map(cert => {
     const userCert = driver_certs.find(item => item.cert === cert)
-    const attributes = userCert ? `checked ${userCert.is_approved && !res.locals.is_opo ? 'disabled ' : ''}` : ''
+    const attributes = userCert ? `checked ${userCert.opo_approved && !res.locals.is_opo ? 'disabled ' : ''}` : ''
     return `<label><input ${attributes}type=checkbox name=vehicle_cert value=${cert}></input>${cert}</label>`
   })
   const form = `
@@ -173,20 +173,20 @@ export function postDriverCertRequest(req, res) {
 
   // If you're the user, delete all the *pending* requests and add the new ones
   // If you're OPO, you can just delete all the requests
-  req.db.run(`DELETE FROM certs_vehicles WHERE user = ? ${!res.locals.is_opo ? 'and is_approved = 0' : ''}`, userId)
+  req.db.run(`DELETE FROM certs_vehicles WHERE user = ? ${!res.locals.is_opo ? 'and opo_approved = 0' : ''}`, userId)
 
   // If the body is empty, that means the user has removed their certs, and we're done
   if (!req.body.vehicle_cert) return getProfileCard(req, res)
 
   // body-parser weirdness: if there's a single value it's a string, if there's multiple it's an
   // array of strings
-  const is_approved = res.locals.is_opo === true ? 1 : 0
+  const opo_approved = res.locals.is_opo === true ? 1 : 0
   const certs_vehicles = typeof req.body.vehicle_cert === 'string' ? [req.body.vehicle_cert] : req.body.vehicle_cert
   certs_vehicles
     .filter(cert => VALID_VEHICLE_CERTS.includes(cert))
     .map(cert => req.db.run(
-      'INSERT OR IGNORE INTO certs_vehicles (user, cert, is_approved) VALUES (?, ?, ?)',
-      userId, cert, is_approved
+      'INSERT OR IGNORE INTO certs_vehicles (user, cert, opo_approved) VALUES (?, ?, ?)',
+      userId, cert, opo_approved
     )) // INSERT OR IGNORE so that existing, approved certs will not be overwritten
 
   return getProfileCard(req, res)
@@ -210,7 +210,7 @@ export function getClubLeadershipRequest(req, res) {
   }
 
   const userClubs = req.db.all(`
-    SELECT clubs.id, name, is_approved
+    SELECT clubs.id, name, opo_approved
     FROM club_leaders
     LEFT JOIN clubs ON clubs.id = club_leaders.club
     WHERE user = ?
@@ -228,10 +228,10 @@ export function getClubLeadershipRequest(req, res) {
   `, userId)
 
   const clubListItems = userClubs.map(club => `
-  <li>${club.name}${club.is_approved === 0 ? ' (pending)' : ''}
+  <li>${club.name}${club.opo_approved === 0 ? ' (pending)' : ''}
   <button
           hx-delete="/profile/${userId}/club-leadership"
-          hx-confirm="Are you sure you want to remove yourself as a${club.is_approved === 0 ? ' (pending)' : ''} leader of ${club.name}?"
+          hx-confirm="Are you sure you want to remove yourself as a${club.opo_approved === 0 ? ' (pending)' : ''} leader of ${club.name}?"
           hx-target="closest li"
           hx-swap="outerHTML"
   ><img src="/static/icons/close-icon.svg"></button>
@@ -260,9 +260,9 @@ export function postClubLeadershipRequest(req, res) {
   const club = req.body.club
   if (!club) return res.sendStatus(400)
 
-  const is_approved = res.locals.is_opo === true ? 1 : 0
-  req.db.run('INSERT INTO club_leaders (user, club, is_approved) VALUES (?, ?, ?)',
-    userId, club, is_approved)
+  const opo_approved = res.locals.is_opo === true ? 1 : 0
+  req.db.run('INSERT INTO club_leaders (user, club, opo_approved) VALUES (?, ?, ?)',
+    userId, club, opo_approved)
   return getProfileCard(req, res)
 }
 

@@ -56,7 +56,7 @@ export function requireAnyLeader(req, res, next) {
   return requireAuth(req, res, () => {
     if (res.locals.is_opo === true) return next()
     const isLeader = req.db.get(`
-      SELECT 1 as is_leader FROM club_leaders WHERE user = ? and is_approved = TRUE`,
+      SELECT 1 as is_leader FROM club_leaders WHERE user = ? and opo_approved = TRUE`,
     req.user)?.is_leader === 1
 
     if (isLeader) return next()

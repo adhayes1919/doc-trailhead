@@ -14,7 +14,7 @@ function getClubs(db, userId, isOpo) {
       SELECT clubs.id, clubs.name
       FROM club_leaders
       LEFT JOIN clubs ON clubs.id = club_leaders.club
-      WHERE user = ? AND is_approved = 1
+      WHERE user = ? AND opo_approved = 1
       ORDER BY name
       `, userId)
   }

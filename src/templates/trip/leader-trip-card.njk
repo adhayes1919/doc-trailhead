@@ -253,12 +253,12 @@ on time. 48 hours before trip-start you can begin checking out your trip.
       <input name=assigned_pcard
              type=text
              value="{{ pcard_request.assigned_pcard }}"
-             {% if pcard_request.is_approved === 1 %}disabled{%endif%}
+             {% if pcard_request.opo_approved === 1 %}disabled{%endif%}
              >
     </label>
     <div class=button-row>
       <button class="action deny" hx-put="/opo/pcard/{{ trip_id }}/deny">Deny</button>
-      {% if pcard_request.is_approved === 1 %}
+      {% if pcard_request.opo_approved === 1 %}
       <button class="action edit" hx-put="/opo/pcard/{{ trip_id }}/reset">Reset</button>
       {% else %}
       <button class="action approve" type=submit>Approve</button>

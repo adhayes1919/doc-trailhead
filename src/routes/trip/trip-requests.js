@@ -7,8 +7,8 @@ export function getRequestsView(req, res) {
     SELECT
       member_gear_approved,
       group_gear_approved,
-      vehiclerequests.is_approved AS vehiclerequest_approved,
-      trip_pcard_requests.is_approved AS pcard_approved
+      vehiclerequests.opo_approved AS vehiclerequest_approved,
+      trip_pcard_requests.opo_approved AS pcard_approved
     FROM trips
     LEFT JOIN vehiclerequests ON trips.id = vehiclerequests.trip
     LEFT JOIN trip_pcard_requests ON trips.id = trip_pcard_requests.trip
@@ -64,7 +64,7 @@ function getGroupGearData(req, tripId) {
 
 function getPcardData(req, tripId) {
   const pcard = req.db.get(`
-    SELECT is_approved, num_people, snacks, breakfast, lunch, dinner
+    SELECT opo_approved, num_people, snacks, breakfast, lunch, dinner
     FROM trip_pcard_requests
     WHERE trip = ?
   `, tripId)
