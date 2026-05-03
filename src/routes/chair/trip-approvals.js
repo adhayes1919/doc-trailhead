@@ -43,8 +43,6 @@ export function get(req, res) {
 
   const userId = parseInt(req.user)
 
-  // TODO: naming...
-  // TODO: should be a function tbh
   const userChairIn = req.db.all(`
     SELECT 
         clubs.id,
@@ -55,12 +53,9 @@ export function get(req, res) {
     ORDER BY name
   `, userId)
 
-  // TODO: literally cannot comprehend naming conventions here
+  //TODO: if users are chair in multiple clubs, ideally let them filter which to see
   const clubIds = userChairIn.map(({ id }) => id)
   const club_names = userChairIn.map(({ name }) => name)
-
-  // TODO: move the string-ing to here...
-  // TODO: handle when lists are empty
 
   const past_trips = req.db.all(
     `${CLUB_CHAIR_TRIPS_QUERY}

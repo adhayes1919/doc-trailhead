@@ -1,9 +1,5 @@
 import * as utils from '../../utils.js'
 
-//TODO: should adding trip_members with med certs be one query or two?
-//NOTE: def butchering this...
-//NOTE: some of this could probably get cleaned up into case statements? 
-//TODO: also check convention on making mega queries like these...
 //
 //also double users + double trip_members feels reallllly messy?
 const _60_DAYS_IN_MS = 5184000000
@@ -52,16 +48,6 @@ export function get(req, res) {
   const now = new Date()
   const pastTimeWindow = new Date(now.getTime() - _60_DAYS_IN_MS)
 
-  /*
-  //NOTE: put this in a reference somewhere
-  const leaders = req.db.all('SELECT DISTINCT club_leaders.user from club_leaders INNER JOIN users ON club_leaders.user = users.id');
-    const ids = [...new Set(leaders.map(obj => obj.user))];
-  
-  const placeholders = ids.map(() => '(?,?,?)').join(',');
-  const medcertValues = ids.flatMap(id => [id, 'WFA', 1774569600000])
-  req.db.prepare(`INSERT INTO certs_med (user, type, expiration) VALUES ${placeholders}`,).run(...medcertValues);
-  */
-
   const past_trips = req.db.all(
     `${OPO_TRIPS_QUERY}
     WHERE start_time > @low_time
@@ -73,9 +59,6 @@ export function get(req, res) {
     { low_time: pastTimeWindow.getTime(), high_time: now.getTime() }
   ).map(convertToRow)
 
-    //console.log(past_trips);
-
-      //NOTE:
   const future_trips = req.db.all(
     `${OPO_TRIPS_QUERY}
     WHERE start_time > ?
@@ -85,24 +68,18 @@ export function get(req, res) {
       `,
     now.getTime()
   ).map(convertToRow)
-    //console.log(future_trips);
 
   res.render('views/opo/trip-approvals.njk', { past_trips, future_trips })
 }
 
 function convertToRow(trip) {
   const now = new Date()
-  //NOTE: this is messyyyyyy  
-    //TODO: i actually hate this....
-  const valid_medcerts = new Set(JSON.parse(trip.medcert_expirations).map(expiration_date => expiration_date >= now.getTime() ? 1 : 0))
-  const medcert_status = valid_medcerts.size === 1 ? valid_medcerts.values().next().value : "pending" 
 
   return {
     id: trip.id,
     title: trip.title,
     owner: trip.owner,
     start_time_element: utils.getDatetimeElement(trip.start_time),
-    medcert_status_element: utils.getBadgeImgElement(medcert_status),
     mg_status_element: utils.getBadgeImgElement(trip.mg_status),
     gg_status_element: utils.getBadgeImgElement(trip.gg_status),
     vr_status_element: utils.getBadgeImgElement(trip.vr_status),

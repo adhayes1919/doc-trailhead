@@ -13,7 +13,6 @@ export function get(req, res) {
   `, userId)
   const clubIds = userChairIn.map(({ id }) => id)
 
-  // TODO: note the medcert naming inconsistencies
   const leadership_requests = req.db.all(`
    SELECT 
     club_leaders.rowid as req_id, 

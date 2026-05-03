@@ -29,7 +29,7 @@ export function get(req, res) {
     const date = new Date(row.chair_since)
     row.chair_since = dateFormat(date, 'mm-dd-yyyy')
     return row
-  }) // TODO: actually so ugly, not sure why I keep doing this...?
+  }) 
 
   const cert_requests = req.db.all(`
    SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
