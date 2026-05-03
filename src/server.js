@@ -37,7 +37,7 @@ export function startServer(trailheadDb, port) {
   app.use(handleError)
 
   const server = app.listen(port)
-  //console.log(`Server running at http://localhost:${server.address().port}`)
+  // console.log(`Server running at http://localhost:${server.address().port}`)
   console.error(`Starting up at ${new Date()}`)
   return server
 }

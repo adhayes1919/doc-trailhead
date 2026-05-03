@@ -122,13 +122,13 @@ export async function signinCAS(req, res) {
 
   // Validate the ticket that is provided with the CAS server to verify that it's valid
   const params = new URLSearchParams({ service: service_url, ticket })
-  console.log(`val url: ${cas_url}`);
+  console.log(`val url: ${cas_url}`)
 
   const validationUri = cas_url + '/serviceValidate?' + params
 
   const validationRes = await fetch(validationUri)
   const validationText = await validationRes.text()
-  console.log(`validation : ${validationText}`);
+  console.log(`validation : ${validationText}`)
 
   const partialCasId = validationText.match(CASID_RE)?.at(1)
   const netId = validationText.match(NETID_RE)?.at(1)

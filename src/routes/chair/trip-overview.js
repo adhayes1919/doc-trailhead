@@ -53,7 +53,7 @@ export function get(req, res) {
     ORDER BY name
   `, userId)
 
-  //TODO: if users are chair in multiple clubs, ideally let them filter which to see
+  // TODO: if users are chair in multiple clubs, ideally let them filter which to see
   const clubIds = userChairIn.map(({ id }) => id)
   const club_names = userChairIn.map(({ name }) => name)
 

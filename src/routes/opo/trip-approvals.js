@@ -1,7 +1,7 @@
 import * as utils from '../../utils.js'
 
 //
-//also double users + double trip_members feels reallllly messy?
+// also double users + double trip_members feels reallllly messy?
 const _60_DAYS_IN_MS = 5184000000
 const OPO_TRIPS_QUERY = `
     SELECT 
@@ -73,8 +73,6 @@ export function get(req, res) {
 }
 
 function convertToRow(trip) {
-  const now = new Date()
-
   return {
     id: trip.id,
     title: trip.title,

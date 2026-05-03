@@ -1,6 +1,5 @@
-import * as utils from '../../utils.js'
 import dateFormat from 'dateformat'
-/*NOTE: Some queries in this repo use true/false and some use 1/0, I tried to at least be locally consistent and have this file only use true/false.
+/* NOTE: Some queries in this repo use true/false and some use 1/0, I tried to at least be locally consistent and have this file only use true/false.
  * In particular, for club leadership (which must be chair approved AND opo approved) I feel true/false is more legible
  */
 
@@ -32,7 +31,7 @@ export function get(req, res) {
     const date = new Date(row.chair_since)
     row.chair_since = dateFormat(date, 'mm-dd-yyyy')
     return row
-  }) 
+  })
 
   const cert_requests = req.db.all(`
    SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
@@ -50,7 +49,7 @@ export function approveLeadershipRequest(req, res) {
   return res.status(200).send('')
 }
 
-//TODO: Check with OPO if this should delete entirely or send back to club chairs
+// TODO: Check with OPO if this should delete entirely or send back to club chairs
 export function denyLeadershipRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
@@ -58,17 +57,17 @@ export function denyLeadershipRequest(req, res) {
   return res.status(200).send('')
 }
 
-export function approveVehicleCertRequest(req, res) {
+export function approveDriverCertRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
   req.db.run('UPDATE certs_vehicles SET is_approved = TRUE WHERE rowid = ?', rowid)
   return res.status(200).send('')
 }
 
-export function denyVehicleCertRequest(req, res) {
+export function denyDriverCertRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  const result = req.db.run('DELETE FROM certs_vehicles WHERE rowid = ? AND is_approved = FALSE', rowid)
+  req.db.run('DELETE FROM certs_vehicles WHERE rowid = ? AND is_approved = FALSE', rowid)
   return res.status(200).send('')
 }
 
