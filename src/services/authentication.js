@@ -61,7 +61,7 @@ export function requireAnyLeader(req, res, next) {
   return requireAuth(req, res, () => {
     if (res.locals.is_opo === true) return next()
     const isLeader = req.db.get(`
-      SELECT 1 as is_leader FROM club_leaders WHERE user = ? and opo_approved = TRUE`,
+      SELECT 1 as is_leader FROM club_leaders WHERE user = ? and opo_approved = TRUE AND chair_approved = TRUE`,
     req.user)?.is_leader === 1
 
     if (isLeader) return next()
@@ -69,14 +69,9 @@ export function requireAnyLeader(req, res, next) {
   })
 }
 
-/** Allow the request if the user is a chair of ANY club, or an OPO staffer. */
-// NOTE: might eventually remove the OPO part as its redudndant unless I add a "simualate chair" view, which I don't really expect to be all that useful
-//
-// TODO:: !! literally cannot comprehend why every component checks if leader directly
+/** Allow the request if the user is a chair of ANY club. */
 export function requireAnyChair(req, res, next) {
   return requireAuth(req, res, () => {
-    if (res.locals.is_opo === true) return next()
-
     const isChair = req.db.get(`
       SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`, req.user)?.is_chair >= 1
     if (isChair) return next()
@@ -85,22 +80,18 @@ export function requireAnyChair(req, res, next) {
 }
 
 /** Allow the request if the user is a leader the specific trip, or an OPO staffer */
-// NOTE: this is getting messy to have "trip leader or opo or chair...", feels like theres gotta be a better type
-
 export function requireTripLeader(req, res, next) {
   return requireAuth(req, res, () => {
     const tripId = req.params.tripId
     if (!tripId) throw new Error('Trip Leader authorization used on a route without a trip.')
 
-    // TODO: nottt really loving the inconsistencies in user or req.user or req.user.parms or userId or user_id...
-    // is this not "req.db.isLeaderForTrip)" ?
+    // NOTE: is this not "req.db.isLeaderForTrip)" ?
     const isLeader = req.db.get(`
       SELECT 1 as is_leader
       FROM trip_members WHERE user = ? AND trip = ? AND leader = 1
     `, req.user, tripId)?.is_leader === 1
 
-      //NOTE: this probably shouldn't be here? come back and check if the local var is enough?
-    const isChair = req.db.get(`
+    const isCorrectChair = req.db.get(`
       SELECT 1 as is_chair FROM club_chairs     
         WHERE 
           user = ? AND 
@@ -108,9 +99,10 @@ export function requireTripLeader(req, res, next) {
           club = (select club from trips where id = ?)
     `, req.user, tripId)?.is_chair === 1
 
-    // Set a variable that says the current use is a leader for THIS trip
+    // Set a variable that says the current user is a leader for THIS trip
     if (isLeader) res.locals.is_leader_for_trip = true
-    if (res.locals.is_opo === true || isChair || isLeader) return next()
+    // Proceed if user is actual leader, the respective chair for the trip's club, or OPO staff
+    if (res.locals.is_opo === true || isCorrectChair || isLeader) return next()
 
     return res.sendStatus(403)
   })
@@ -131,9 +123,6 @@ export async function signinCAS(req, res) {
   // Validate the ticket that is provided with the CAS server to verify that it's valid
   const params = new URLSearchParams({ service: service_url, ticket })
   console.log(`val url: ${cas_url}`);
-
-  //NOTE: what the hell???
-  //validation : <cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
 
   const validationUri = cas_url + '/serviceValidate?' + params
 

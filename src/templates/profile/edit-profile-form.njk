@@ -36,14 +36,6 @@
 
     <dt> Med Cert 
     <dd> <select name="medcert_type">
-            <!-- #TODO: because of some CSS I don't understand makes these extend past the trip card, NOT worth my time right now though...
-            <option> Basic First Aid + CPR
-            <option> Wilderness First Aid (WFA)
-            <option> Wilderness Advanced First Aid (WAFA)
-            <option> Wilderness First Responder (WFR)
-            <option> Outdoor Emergency Care (OEC)
-            <option> Wilderness EMT (W-EMT)
-            -->
         <option> None
             <option {{ 'selected' if medcert_type == "Basic First Aid(+CPR)"}}> Basic First Aid(+CPR) 
             <option {{ 'selected' if medcert_type == "WFA"}}> WFA

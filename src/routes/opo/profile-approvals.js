@@ -1,5 +1,8 @@
 import * as utils from '../../utils.js'
 import dateFormat from 'dateformat'
+/*NOTE: Some queries in this repo use true/false and some use 1/0, I tried to at least be locally consistent and have this file only use true/false.
+ * In particular, for club leadership (which must be chair approved AND opo approved) I feel true/false is more legible
+ */
 
 export function get(req, res) {
   const leadership_requests = req.db.all(`
@@ -7,7 +10,7 @@ export function get(req, res) {
    FROM club_leaders
    LEFT JOIN clubs ON clubs.id = club_leaders.club
    LEFT JOIN users ON users.id = club_leaders.user
-   WHERE opo_approved = 0 and chair_approved = 1
+   WHERE opo_approved = FALSE and chair_approved = TRUE
    `)
 
   const chair_requests = req.db.all(`
@@ -15,7 +18,7 @@ export function get(req, res) {
    FROM club_chairs
    LEFT JOIN clubs ON clubs.id = club_chairs.club
    LEFT JOIN users ON users.id = club_chairs.user
-   WHERE is_approved = 0
+   WHERE is_approved = FALSE
    `)
 
   const active_chairs = req.db.all(`
@@ -23,7 +26,7 @@ export function get(req, res) {
    FROM club_chairs
    LEFT JOIN clubs ON clubs.id = club_chairs.club
    LEFT JOIN users ON users.id = club_chairs.user
-   WHERE is_approved = 1 
+   WHERE is_approved = TRUE
    ORDER BY club_name, chair_since
    `).map(row => {
     const date = new Date(row.chair_since)
@@ -35,7 +38,7 @@ export function get(req, res) {
    SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
    FROM certs_vehicles
    LEFT JOIN users ON users.id = certs_vehicles.user
-   WHERE is_approved = 0`)
+   WHERE is_approved = TRUE`)
 
   return res.render('views/opo/profile-approvals.njk', { leadership_requests, chair_requests, active_chairs, cert_requests })
 }
@@ -43,36 +46,38 @@ export function get(req, res) {
 export function approveLeadershipRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('UPDATE club_leaders SET opo_approved = 1 WHERE rowid = ?', rowid)
+  req.db.run('UPDATE club_leaders SET opo_approved = TRUE WHERE rowid = ? AND chair_approved = TRUE', rowid)
   return res.status(200).send('')
 }
 
+//TODO: Check with OPO if this should delete entirely or send back to club chairs
 export function denyLeadershipRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('DELETE FROM club_leaders WHERE rowid = ? AND opo_approved = 0', rowid)
+  req.db.run('DELETE FROM club_leaders WHERE rowid = ? AND opo_approved = FALSE', rowid)
   return res.status(200).send('')
 }
 
+//NOTE: ideally i rename this to clarify its vehicle cert but not urgent tbh...
 export function approveCertRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('UPDATE certs_vehicles SET is_approved = 1 WHERE rowid = ?', rowid)
+  req.db.run('UPDATE certs_vehicles SET is_approved = TRUE WHERE rowid = ?', rowid)
   return res.status(200).send('')
 }
 
 export function denyCertRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('DELETE FROM certs_vehicles WHERE rowid = ? AND is_approved = 0', rowid)
+  req.db.run('DELETE FROM certs_vehicles WHERE rowid = ? AND is_approved = FALSE', rowid)
   return res.status(200).send('')
 }
 
 export function approveChairRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  const today = Math.floor(new Date().getTime()) // NOTE: this is actually so ugly and surely should use a better function...
-  req.db.run('UPDATE club_chairs SET is_approved = 1, chair_since = ? WHERE rowid = ?', today, rowid)
+  const today = Math.floor(new Date().getTime()) // NOTE: this is actually so ugly and surely a better option exists...
+  req.db.run('UPDATE club_chairs SET is_approved = TRUE, chair_since = ? WHERE rowid = ?', today, rowid)
   return res.status(200).send('')
 }
 

@@ -57,18 +57,17 @@ function getProfileData(req, userId, hideControls) {
   const user = req.db.get('SELECT * FROM users WHERE id = ?', userId)
   if (!user) throw new NotFoundError(`User ${userId} not found`)
 
-  // TODO: "SELECT cert" could probably become vehicle type but literally no desire to make that happen
   const certs_vehicles = req.db
     .all('SELECT cert, is_approved FROM certs_vehicles WHERE user = ?', userId)
     .map(item => `${item.cert}${item.is_approved === 0 ? ' (pending)' : ''}`)
     .join(', ')
 
   // TODO: error checking / if statement here
-  // TODO:  make a function for this...
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (certs_med) {
     user.medcert_type = certs_med.type
     const medcert_expiration_date = new Date(certs_med.expiration)
+
     user.medcert_expiration_date = medcert_expiration_date.toISOString().split('T')[0] // for calendar view
     user.medcert_expiration = dateFormat(medcert_expiration_date, 'mm-dd-yyyy') // for table view
   }
@@ -83,7 +82,6 @@ function getProfileData(req, userId, hideControls) {
   user.inches = user.height_inches % 12
   user.height = `${user.feet}'${user.inches}"`
 
-  // NOTE: this sohuld reasonably become vehicle certifications as well (imo)
   user.driver_certifications = certs_vehicles.length > 0 ? certs_vehicles : 'none'
   user.leader_for = req.db.get(`
     SELECT group_concat(
@@ -138,11 +136,7 @@ export function put(req, res) {
     WHERE id = @user_id
   `, formData)
 
-  // TODO: forgive me for what I'm about to do...
-
-  // TODO: check html vs js naming conventions...
-
-  // TODO: prolly need to clean this or sum
+  //NOTE: now that i'm considering it, not realllly sure whether or not medcerts should be their own table or just columns in users...
   const medcert_type = formData.medcert_type
   const medcert_expiration = new Date(formData.medcert_expiration).getTime()
 
@@ -151,7 +145,7 @@ export function put(req, res) {
     // NOTE: also might not have needed all this but eh
     // NOTE: some places have 'user_id' and some have 'userId'...
     // TODO: this could probably (maybe?) become a seperate function
-    req.db.run(' INSERT or IGNORE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) ', formData.user_id, medcert_type, medcert_expiration)
+    req.db.run('INSERT or REPLACE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) ', formData.user_id, medcert_type, medcert_expiration)
   }
 
   if (formData.new_user === 'true') {
@@ -163,7 +157,6 @@ export function put(req, res) {
 }
 
 const VALID_VEHICLE_CERTS = ['VAN', 'MINIVAN', 'TRAILER']
-// TODO: driver -> vehicle
 export function getDriverCertRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
@@ -190,7 +183,6 @@ export function getDriverCertRequest(req, res) {
   res.send(form).status(200)
 }
 
-// TODO: same as all the other TODOs...
 export function postDriverCertRequest(req, res) {
   const userId = parseInt(req.params.userId)
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
@@ -221,10 +213,6 @@ export function getClubLeadershipRequest(req, res) {
 
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
 
-  // NOTE: should I bother...?
-  // TODO: this is in the wrong branch lmfao
-  // kindaaa don't feel like fixing that, it'll ultimately be part of this anyway...
-
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (!certs_med) {
     const disclaimer = `
@@ -239,7 +227,7 @@ export function getClubLeadershipRequest(req, res) {
   }
 
   const userClubs = req.db.all(`
-    SELECT clubs.id, name, is_approved
+    SELECT clubs.id, name, opo_approved
     FROM club_leaders
     LEFT JOIN clubs ON clubs.id = club_leaders.club
     WHERE user = ?
@@ -258,10 +246,10 @@ export function getClubLeadershipRequest(req, res) {
   `, userId)
 
   const clubListItems = userClubs.map(club => `
-  <li>${club.name}${club.is_approved === 0 ? ' (pending)' : ''}
+  <li>${club.name}${club.opo_approved === 0 ? ' (pending)' : ''}
   <button
           hx-delete="/profile/${userId}/club-leadership/${club.id}"
-          hx-confirm="Are you sure you want to remove yourself as a${club.is_approved === 0 ? ' (pending)' : ''} leader of ${club.name}?"
+          hx-confirm="Are you sure you want to remove yourself as a${club.opo_approved === 0 ? ' (pending)' : ''} leader of ${club.name}?"
           hx-target="closest li"
           hx-swap="outerHTML"
   ><img src="/static/icons/close-icon.svg"></button>
@@ -290,9 +278,10 @@ export function postClubLeadershipRequest(req, res) {
   const club = req.body.club
   if (!club) return res.sendStatus(400)
 
-  const is_approved = res.locals.is_opo === true ? 1 : 0
-  req.db.run('INSERT INTO club_leaders (user, club, is_approved) VALUES (?, ?, ?)',
-    userId, club, is_approved)
+  const opo_approved = res.locals.is_opo === true ? 1 : 0
+  //NOTE: should chairs auto-approve themselves?
+  req.db.run('INSERT INTO club_leaders (user, club, opo_approved) VALUES (?, ?, ?)',
+    userId, club, opo_approved)
   return getProfileCard(req, res)
 }
 
@@ -345,7 +334,6 @@ export function getClubChairRequest(req, res) {
   ><img src="/static/icons/close-icon.svg"></button>
   `)
   const options = clubsWithoutUser.map(club => `<option value=${club.id}>${club.name}</option>`)
-    //TODO: rename css class...
   const form = `
 <form hx-boost=true
       hx-push-url=false
