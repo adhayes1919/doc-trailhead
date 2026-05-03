@@ -158,8 +158,8 @@ router.delete(  '/opo/manage-fleet/:id',                    requireOpo, manageFl
 
 router.put(     '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileApprovals.approveLeadershipRequest)
 router.delete(  '/opo/profile-approvals/leaders/:req_id',   requireOpo, profileApprovals.denyLeadershipRequest)
-router.put(     '/opo/profile-approvals/certs/:req_id',     requireOpo, profileApprovals.approveCertRequest)
-router.delete(  '/opo/profile-approvals/certs/:req_id',     requireOpo, profileApprovals.denyCertRequest)
+router.put(     '/opo/profile-approvals/vehiclecerts/:req_id',     requireOpo, profileApprovals.approveVehicleCertRequest)
+router.delete(  '/opo/profile-approvals/vehiclecerts/:req_id',     requireOpo, profileApprovals.denyVehicleCertRequest)
 router.put(     '/opo/profile-approvals/chair/:req_id',     requireOpo, profileApprovals.approveChairRequest)
 router.delete(  '/opo/profile-approvals/chair/:req_id',     requireOpo, profileApprovals.denyChairRequest)
 router.post(    '/opo/profile-approvals/search',            requireOpo, profileApprovals.searchUsers)

@@ -38,7 +38,7 @@ export function get(req, res) {
    SELECT certs_vehicles.rowid as req_id, users.name AS requester_name, cert AS requested_item
    FROM certs_vehicles
    LEFT JOIN users ON users.id = certs_vehicles.user
-   WHERE is_approved = TRUE`)
+   WHERE is_approved = FALSE`)
 
   return res.render('views/opo/profile-approvals.njk', { leadership_requests, chair_requests, active_chairs, cert_requests })
 }
@@ -58,18 +58,17 @@ export function denyLeadershipRequest(req, res) {
   return res.status(200).send('')
 }
 
-//NOTE: ideally i rename this to clarify its vehicle cert but not urgent tbh...
-export function approveCertRequest(req, res) {
+export function approveVehicleCertRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
   req.db.run('UPDATE certs_vehicles SET is_approved = TRUE WHERE rowid = ?', rowid)
   return res.status(200).send('')
 }
 
-export function denyCertRequest(req, res) {
+export function denyVehicleCertRequest(req, res) {
   const rowid = req.params.req_id
   if (!rowid) return res.sendStatus(400)
-  req.db.run('DELETE FROM certs_vehicles WHERE rowid = ? AND is_approved = FALSE', rowid)
+  const result = req.db.run('DELETE FROM certs_vehicles WHERE rowid = ? AND is_approved = FALSE', rowid)
   return res.status(200).send('')
 }
 

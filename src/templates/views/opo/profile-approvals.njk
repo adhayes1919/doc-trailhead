@@ -58,7 +58,7 @@
     <button
       class="action deny"
       hx-confirm="Deny {{request.requester_name}} as a leader for {{request.requested_item}}?"
-      hx-delete="/opo/profile-approvals/certs/{{request.req_id}}"
+      hx-delete="/opo/profile-approvals/vehiclecerts/{{request.req_id}}"
       hx-target="closest tr"
       hx-swap="outerHTML swap:.7s"
       >Deny
@@ -66,7 +66,7 @@
     <button
       class="action approve"
       hx-confirm="Approve {{request.requester_name}} as a leader for {{request.requested_item}}?"
-      hx-put="/opo/profile-approvals/certs/{{request.req_id}}"
+      hx-put="/opo/profile-approvals/vehiclecerts/{{request.req_id}}"
       hx-target="closest tr"
       hx-swap="outerHTML swap:.7s"
       >Approve
