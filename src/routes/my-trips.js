@@ -30,17 +30,6 @@ export function get(req, res) {
       `
     //TODO: prolly not needed to do db.all here...
     //NOTE: most of this can prolly get cleaned up?
-  const userMedcert = req.db.all('SELECT expiration from certs_med where user = ?', userId)
-  const today = new Date().getTime()
-
-  //const date = new Date()
-  //date.setMonth(date.getMonth() +1)
-  //const oneMonthFromNow = date.getTime();
-  const medcertExpiringSoon = (today + _60_DAYS_IN_MS) > userMedcert[0].expiration 
-  console.log(today + _60_DAYS_IN_MS) 
-    console.log(`is medcert exipring soon? : ${medcertExpiringSoon}`)
-  
-  
 
   const trips = req.db.all(tripsQuery, userId, now.getTime() - _24_HOURS_IN_MS)
     .map(trip => ({
@@ -49,10 +38,28 @@ export function get(req, res) {
       time_element: utils.getDatetimeRangeElement(trip.start_time, trip.end_time)
     }))
 
+    let medcertExpiringSoon = false
+    let userMedcert = null
+    let medcertExpirationDate = null
+
+    if (can_create_trip) {
+      const userMedcert = req.db.all('SELECT expiration from certs_med where user = ?', userId)
+      const today = new Date().getTime()
+      if (userMedcert[0]) {
+        console.log(`userMedcert: ${userMedcert}`)
+          medcertExpiringSoon = (today + _60_DAYS_IN_MS) > userMedcert[0].expiration 
+          medcertExpirationDate = dateFormat(userMedcert[0].expiration, 'mm-dd-yyyy')
+      } else{
+          //TODO: all leaders should have a medcert
+
+      }
+    } 
+
   res.render('views/my-trips.njk', {
     trips,
     medcert_expiring_soon : medcertExpiringSoon,
-    medcert_expiration_date : dateFormat(userMedcert[0].expiration, 'mm-dd-yyyy'),
+    medcert_expiration_date : medcertExpirationDate,
     can_create_trip
   })
 }
+//medcert_expiration_date : dateFormat(userMedcert[0].expiration, 'mm-dd-yyyy'),
