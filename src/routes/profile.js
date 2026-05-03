@@ -62,14 +62,18 @@ function getProfileData(req, userId, hideControls) {
     .map(item => `${item.cert}${item.is_approved === 0 ? ' (pending)' : ''}`)
     .join(', ')
 
-  // TODO: error checking / if statement here
+  const now = new Date();
+  const todayISO = now.toISOString().split('T')[0]; //used for min date of medcert expiration
+  user.today_iso = todayISO;
+
   const certs_med = req.db.get('SELECT type, expiration FROM certs_med WHERE user = ?', userId)
   if (certs_med) {
     user.medcert_type = certs_med.type
     const medcert_expiration_date = new Date(certs_med.expiration)
-
-    user.medcert_expiration_date = medcert_expiration_date.toISOString().split('T')[0] // for calendar view
+    user.medcert_expiration_iso = medcert_expiration_date.toISOString().split('T')[0] // for form input 
     user.medcert_expiration = dateFormat(medcert_expiration_date, 'mm-dd-yyyy') // for table view
+  } else {
+    user.medcert_type = "none"
   }
 
   if (user.shoe_size) {
@@ -136,17 +140,17 @@ export function put(req, res) {
     WHERE id = @user_id
   `, formData)
 
-  //NOTE: now that i'm considering it, not realllly sure whether or not medcerts should be their own table or just columns in users...
-  const medcert_type = formData.medcert_type
-  const medcert_expiration = new Date(formData.medcert_expiration).getTime()
+  const medcertType = formData.medcert_type
+  //slight nonsense to avoid worrying about timezones 
+  const medcertExpiration = new Date(formData.medcert_expiration + 'T00:00:00').getTime()
 
-  if (medcert_type && medcert_expiration) {
-    // TODO: some "else {}" for an error
-    // NOTE: also might not have needed all this but eh
-    // NOTE: some places have 'user_id' and some have 'userId'...
-    // TODO: this could probably (maybe?) become a seperate function
-    req.db.run('INSERT or REPLACE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) ', formData.user_id, medcert_type, medcert_expiration)
-  }
+  if (medcertType && medcertExpiration) {
+    req.db.run('INSERT or REPLACE INTO certs_med (user, type, expiration) VALUES (?, ?, ?) ', formData.user_id, medcertType, medcertExpiration)
+  } else if (!medcertType)  {
+    req.db.run('DELETE FROM certs_med where user = ?', formData.user_id)
+  } else {
+    return res.sendStatus(400).json({ error: "Form data malformed: Submitted with just one of medcert type and expiration date." });
+  }  
 
   if (formData.new_user === 'true') {
     res.set('HX-Redirect', '/all-trips')
@@ -218,7 +222,7 @@ export function getClubLeadershipRequest(req, res) {
     const disclaimer = `
 <div>
   <div class="warn-message">
-  You do not have any med certs saved. Please make sure you have a valid med cert before requesting club leadership.
+  You do not have any med certs saved. Please make sure you have a valid med cert saved before requesting club leadership.
   </div>
   <button class="action deny" hx-get="/profile/${userId}?card=true">Cancel</button>
 </div>
@@ -300,10 +304,7 @@ export function getClubChairRequest(req, res) {
   const userId = parseInt(req.params.userId)
 
   if (userId !== req.user && !res.locals.is_opo) return res.sendStatus(403)
-  // TODO: gotta change this to allow things like poco...
 
-
-    //NOTE: i do nottt like this var name ngl
   const userClubs = req.db.all(`
     SELECT clubs.id, name, is_approved
     FROM club_chairs
@@ -312,7 +313,6 @@ export function getClubChairRequest(req, res) {
     ORDER BY name
   `, userId)
 
-    //NOTE: also doing two of these queries feels strange?
   const clubsWithoutUser = req.db.all(`
     SELECT id, name
     FROM clubs
@@ -356,7 +356,8 @@ export function postClubChairRequest(req, res) {
   const club = req.body.club
   if (!club) return res.sendStatus(400)
 
-  const today = Math.floor(new Date().getTime()) // NOTE: this is actually so ugly and surely should use a better function...
+  const today = Math.floor(new Date().getTime()) 
+  // NOTE: this is actually so ugly and surely should use a better function...
   const is_approved = res.locals.is_opo === true ? 1 : 0
   req.db.run('INSERT INTO club_chairs (user, club, chair_since, is_approved) VALUES (?, ?, ?, ?)',
     userId, club, today, is_approved)

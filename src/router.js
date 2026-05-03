@@ -26,7 +26,6 @@ import * as manageFleet from './routes/opo/manage-fleet.js'
 
 // TODO: these can get better names, wont worry about them yet...
 import * as chairTripApprovalsView from './routes/chair/trip-approvals.js'
-import * as chairVehicleRequests from './routes/chair/vehicle-requests.js'
 import * as chairProfileApprovals from './routes/chair/profile-approvals.js'
 
 import * as authentication from './services/authentication.js'
@@ -63,7 +62,6 @@ router.get('/opo/calendar', requireOpo, (_req, res) => {
   res.render('views/opo/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
 })
 
-router.get('/chair/vehicle-requests', requireAnyChair, chairVehicleRequests.get)
 router.get('/chair/trip-approvals', requireAnyChair, chairTripApprovalsView.get)
 router.get('/chair/profile-approvals', requireAnyChair, chairProfileApprovals.get)
 
@@ -83,10 +81,10 @@ router.get(     '/profile/:userId/driver-cert',             requireAuth, profile
 router.post(    '/profile/:userId/driver-cert',             requireAuth, profile.postDriverCertRequest)
 router.get(     '/profile/:userId/club-leadership',         requireAuth, profile.getClubLeadershipRequest)
 router.post(    '/profile/:userId/club-leadership',         requireAuth, profile.postClubLeadershipRequest)
-router.delete(  '/profile/:userId/club-leadership/:clubId',         requireAuth, profile.deleteClubLeadershipRequest)
-router.get(     '/profile/:userId/club-chair',         requireAuth, profile.getClubChairRequest)
-router.post(    '/profile/:userId/club-chair',         requireAuth, profile.postClubChairRequest)
-router.delete(  '/profile/:userId/club-chair/:clubId',         requireAuth, profile.deleteClubChairRequest)
+router.delete(  '/profile/:userId/club-leadership/:clubId', requireAuth, profile.deleteClubLeadershipRequest)
+router.get(     '/profile/:userId/club-chair',              requireAuth, profile.getClubChairRequest)
+router.post(    '/profile/:userId/club-chair',              requireAuth, profile.postClubChairRequest)
+router.delete(  '/profile/:userId/club-chair/:clubId',      requireAuth, profile.deleteClubChairRequest)
 
 /**********************
  * Trip Routes

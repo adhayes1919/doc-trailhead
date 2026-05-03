@@ -34,16 +34,39 @@
   <dt>Allergies/Dietary Restrictions<dd><input type=text name="allergies_dietary_restrictions" value="{{ allergies_dietary_restrictions }}">
   <dt>Medical Conditions<dd><input type=text name="medical_conditions" value="{{ medical_conditions }}">
 
-    <dt> Med Cert 
-    <dd> <select name="medcert_type">
-        <option> None
-            <option {{ 'selected' if medcert_type == "Basic First Aid(+CPR)"}}> Basic First Aid(+CPR) 
-            <option {{ 'selected' if medcert_type == "WFA"}}> WFA
-            <option {{ 'selected' if medcert_type == "WAFA"}}> WAFA
-            <option {{ 'selected' if medcert_type == "WFR"}}> WFR
-            <option {{ 'selected' if medcert_type == "OEC"}}> OEC
-            <option {{ 'selected' if medcert_type == "W-EMT"}}> W-EMT
-        </select>
-    <dt class="nonsense"> Med Cert Expiration 
-    <dd> <input name="medcert_expiration" type="date" value={{ medcert_expiration_date }}>  
+  <dt >Med Cert <dd> 
+      <select id="medcert_type" name="medcert_type">
+        <option value=""> none
+        <option {{ 'selected' if medcert_type == "Basic First Aid(+CPR)"}}> Basic First Aid(+CPR) 
+        <option {{ 'selected' if medcert_type == "WFA"}}> WFA
+        <option {{ 'selected' if medcert_type == "WAFA"}}> WAFA
+        <option {{ 'selected' if medcert_type == "WFR"}}> WFR
+        <option {{ 'selected' if medcert_type == "OEC"}}> OEC
+        <option {{ 'selected' if medcert_type == "W-EMT"}}> W-EMT
+      </select>
+    <dt> Med Cert Expiration <dd> 
+        <input id="medcert_expiration" name="medcert_expiration" type="date" min="{{ today_iso }}" value={{ medcert_expiration_iso }}>  
 </dl>
+
+<script>
+  document.getElementById("medcert_type").addEventListener('input', () => {
+    const medcertType = document.getElementById("medcert_type")
+    const medcertExpiration = document.getElementById("medcert_expiration")
+    if (medcertType.value == "" || medcertType.value == "none") {
+      medcertExpiration.required = false;
+    } else {
+      medcertExpiration.required = true;
+    }
+  });
+
+  document.getElementById("medcert_expiration").addEventListener('input', () => {
+    const medcertType = document.getElementById("medcert_type")
+    const medcertExpiration = document.getElementById("medcert_expiration")
+    if (medcertExpiration.value) {
+      medcertType.required = true;
+    } else {
+      medcertType.required = false;
+    }
+  });
+
+</script>
