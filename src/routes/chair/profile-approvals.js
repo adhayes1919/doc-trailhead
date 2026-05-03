@@ -8,7 +8,7 @@ export function get(req, res) {
         clubs.name
     FROM club_chairs
     LEFT JOIN clubs ON clubs.id = club_chairs.club
-    WHERE user = ? AND opo_approved = 1
+    WHERE user = ? AND is_approved = 1
     ORDER BY name
   `, userId)
   const clubIds = userChairIn.map(({ id }) => id)

@@ -27,7 +27,7 @@ function getLeaderData(req, tripId, userId) {
       iif(experience_needed = 0, 'No', 'Yes') as experience_needed,
       cost,
       vehiclerequests.id as vehiclerequest_id,
-      vehiclerequests.opo_approved as vehiclerequest_opo_approved,
+      vehiclerequests.is_approved as vehiclerequest_is_approved,
       vehiclerequests.request_details as vehiclerequest_details,
       member_gear_approved,
       group_gear_approved
@@ -89,7 +89,7 @@ function getLeaderData(req, tripId, userId) {
     SELECT
       assigned_pcard,
       num_people,
-      opo_approved,
+      is_approved,
       snacks as snacks_num,
       breakfast as breakfast_num,
       lunch as lunch_num,
@@ -138,7 +138,7 @@ function getLeaderData(req, tripId, userId) {
     const vehicleRequestData = getVehicleRequestData(req, trip.vehiclerequest_id)
     trip.available_vehicles = vehicleRequestData.available_vehicles
     trip.requested_vehicles = vehicleRequestData.requested_vehicles
-    trip.vehiclerequest_opo_approved = vehicleRequestData.vehiclerequest_opo_approved
+    trip.vehiclerequest_is_approved = vehicleRequestData.vehiclerequest_is_approved
     trip.vehiclerequest_badge = vehicleRequestData.vehiclerequest_badge
   }
 
@@ -160,17 +160,17 @@ function getLeaderData(req, tripId, userId) {
 
   // TODO Refactor the badge method to make this less annoying
   if (trip.pcard_request) {
-    trip.pcard_request.status = trip.pcard_request.opo_approved === null
+    trip.pcard_request.status = trip.pcard_request.is_approved === null
       ? utils.getBadgeImgElement('pending')
-      : utils.getBadgeImgElement(trip.pcard_request.opo_approved)
+      : utils.getBadgeImgElement(trip.pcard_request.is_approved)
   }
 
   // True if all the status are approved or N/A, false otherwise
   const tripFinalStatus =
     (memberRequestedGear.length === 0 || trip.member_gear_approved === 1) &&
     (groupGearRequests || trip.group_gear_approved === 1) &&
-    (!trip.pcard_request || trip.pcard_request.opo_approved === 1) &&
-    (!trip.vehiclerequest_id || trip.vehiclerequest_opo_approved === 1)
+    (!trip.pcard_request || trip.pcard_request.is_approved === 1) &&
+    (!trip.vehiclerequest_id || trip.vehiclerequest_is_approved === 1)
   const badgeName = tripFinalStatus ? 'approved' : 'pending'
   trip.status_tag = utils.getStatusTag(trip.left, trip.returned, trip.late)
   trip.full_gear_status_badge = utils.getBadgeImgElement(badgeName)

@@ -13,11 +13,11 @@ export function getVehicleRequestView(req, res) {
 export function getVehicleRequestData(req, vehicleRequestId) {
   const available_vehicles = req.db.getActiveVehicles()
   // Note the ORDER BY ensures that the response_index is lined up
-  const opo_approved = req.db
-    .get('SELECT opo_approved FROM vehiclerequests WHERE id = ?', vehicleRequestId)
-    .opo_approved
+  const is_approved = req.db
+    .get('SELECT is_approved FROM vehiclerequests WHERE id = ?', vehicleRequestId)
+    .is_approved
 
-  const requestStatus = opo_approved === null ? 'pending' : opo_approved
+  const requestStatus = is_approved === null ? 'pending' : is_approved
   const requestedVehicles = req.db.all(`
     SELECT
       type,
@@ -70,7 +70,7 @@ export function getVehicleRequestData(req, vehicleRequestId) {
     vehiclerequest_id: vehicleRequestId,
     available_vehicles,
     requested_vehicles,
-    vehiclerequest_opo_approved: opo_approved,
+    vehiclerequest_is_approved: is_approved,
     vehiclerequest_badge: utils.getBadgeImgElement(requestStatus)
   }
 }

@@ -44,7 +44,7 @@ export function requireAuth(req, res, next) {
     res.locals.is_opo = userInfo.is_opo === 1
 
     const isChair = req.db.get(`
-      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and opo_approved = TRUE`,
+      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`,
     req.user)?.is_chair >= 1
 
     res.locals.is_chair = isChair
@@ -78,7 +78,7 @@ export function requireAnyChair(req, res, next) {
     if (res.locals.is_opo === true) return next()
 
     const isChair = req.db.get(`
-      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and opo_approved = TRUE`, req.user)?.is_chair >= 1
+      SELECT 1 as is_chair FROM club_chairs WHERE user = ? and is_approved = TRUE`, req.user)?.is_chair >= 1
     if (isChair) return next()
     return res.sendStatus(403)
   })
@@ -104,7 +104,7 @@ export function requireTripLeader(req, res, next) {
       SELECT 1 as is_chair FROM club_chairs     
         WHERE 
           user = ? AND 
-          opo_approved = TRUE AND 
+          is_approved = TRUE AND 
           club = (select club from trips where id = ?)
     `, req.user, tripId)?.is_chair === 1
 
@@ -130,10 +130,16 @@ export async function signinCAS(req, res) {
 
   // Validate the ticket that is provided with the CAS server to verify that it's valid
   const params = new URLSearchParams({ service: service_url, ticket })
+  console.log(`val url: ${cas_url}`);
+
+  //NOTE: what the hell???
+  //validation : <cas:serviceResponse xmlns:cas='http://www.yale.edu/tp/cas'>
+
   const validationUri = cas_url + '/serviceValidate?' + params
 
   const validationRes = await fetch(validationUri)
   const validationText = await validationRes.text()
+  console.log(`validation : ${validationText}`);
 
   const partialCasId = validationText.match(CASID_RE)?.at(1)
   const netId = validationText.match(NETID_RE)?.at(1)
