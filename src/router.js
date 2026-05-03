@@ -24,8 +24,7 @@ import * as vehicleRequests from './routes/opo/vehicle-requests.js'
 import * as profileApprovals from './routes/opo/profile-approvals.js'
 import * as manageFleet from './routes/opo/manage-fleet.js'
 
-// TODO: these can get better names, wont worry about them yet...
-import * as chairTripApprovalsView from './routes/chair/trip-approvals.js'
+import * as chairTripOverview from './routes/chair/trip-overview.js'
 import * as chairProfileApprovals from './routes/chair/profile-approvals.js'
 
 import * as authentication from './services/authentication.js'
@@ -62,9 +61,8 @@ router.get('/opo/calendar', requireOpo, (_req, res) => {
   res.render('views/opo/calendar.njk', { LICENSE_KEY: process.env.FULLCALENDAR_LICENSE })
 })
 
-router.get('/chair/trip-approvals', requireAnyChair, chairTripApprovalsView.get)
+router.get('/chair/trip-overview', requireAnyChair, chairTripOverview.get)
 router.get('/chair/profile-approvals', requireAnyChair, chairProfileApprovals.get)
-
 
 /**********************
  * User Profile Routes

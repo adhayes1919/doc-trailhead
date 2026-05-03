@@ -1,7 +1,7 @@
 import * as utils from '../../utils.js'
 
 const _60_DAYS_IN_MS = 5184000000
-//NOTE: not clubid is literally used at all but such is life
+
 const CLUB_CHAIR_TRIPS_QUERY = `
     SELECT 
       trips.id,
@@ -74,7 +74,7 @@ export function get(req, res) {
     now.getTime()
   ).map(convertToRow)
 
-  res.render('views/chair/trip-approvals.njk', { club_names, past_trips, future_trips })
+  res.render('views/chair/trip-overview.njk', { club_names, past_trips, future_trips })
 }
 
 function convertToRow(trip) {
