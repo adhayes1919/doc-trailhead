@@ -35,17 +35,7 @@ export function get(req, res) {
      ORDER BY club_name, club_leaders.rowid
    `)
 
-  const cert_requests = req.db.all(`
-   SELECT
-    certs_vehicles.rowid as req_id,
-    users.id as requester_id,
-    users.name AS requester_name,
-    cert AS requested_item
-   FROM certs_vehicles
-   LEFT JOIN users ON users.id = certs_vehicles.user
-   WHERE is_approved = FALSE`)
-
-  const data = { leadership_requests, chair_requests, club_chairs, cert_requests }
+  const data = { leadership_requests, chair_requests, club_chairs }
   return res.render('views/opo/profile-approvals.njk', data)
 }
 
