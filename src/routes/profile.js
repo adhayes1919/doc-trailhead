@@ -10,7 +10,8 @@ const VALID_MED_CERTS = [
   'WAFA',
   'WFR',
   'OEC',
-  'W-EMT'
+  'EMT',
+  'W-EMT',
 ]
 
 export function getProfileView(req, res) {
