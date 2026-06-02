@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Create an error dialog box
       const errorDialog = document.createElement('div')
-      errorDialog.classList.add('error-message')
+      errorDialog.classList.add('message', 'error')
       errorDialog.innerText = evt.detail.serverResponse
       errorDialog.setAttribute('onclick', 'this.remove()')
 
       // Delete existing error
-      for (const existingError of document.querySelectorAll('.site-nav + .error-message')) {
+      for (const existingError of document.querySelectorAll('.site-nav + .message.error')) {
         existingError.remove()
       }
 
