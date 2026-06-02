@@ -11,7 +11,7 @@ const VALID_MED_CERTS = [
   'WFR',
   'OEC',
   'EMT',
-  'W-EMT',
+  'W-EMT'
 ]
 
 export function getProfileView(req, res) {
