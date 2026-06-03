@@ -1,6 +1,6 @@
 Hello,
 
-Trip #{{ trip.id }}: {{ trip.title }} was deleted, and they had requested the vehicles approved:
+Trip #{{ trip.id }}: {{ trip.title }} was deleted, and they had requested the following vehicle requests approved:
 
 {% for vehicle in trip.requestedVehicles %}
   - {{ vehicle.type }} - Approved for pickup at: {{ vehicle.pickup_time }})
