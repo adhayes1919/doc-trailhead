@@ -34,7 +34,7 @@ export function startServer(trailheadDb, port) {
   app.get('/healthcheck', (_, res) => { res.send('OK') })
   app.use('/', apiRouter)
   app.all('*', (req, res, next) => {
-    next({ code: 404, message: 'Page not found' })
+    next({ code: 404 })
   })
   app.use(handleError)
 
@@ -45,7 +45,7 @@ export function startServer(trailheadDb, port) {
 }
 
 function handleError(err, req, res, _next) {
-  if (err.code == 404) {
+  if (err.code === 404) {
     res.status(err.code).render('errors/response404.njk')
   } else if (err.code < 500) {
     res.status(err.code).send(err.message)
