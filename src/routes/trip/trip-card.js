@@ -53,7 +53,7 @@ function getLeaderData(req, tripId, userId) {
     leader,
     pending,
     created_at,
-    iif(trips.start_time < unixepoch() * 1000,
+    iif(trips.start_time < unixepoch(),
         '-',
         iif(attended = 0, 'No', 'Yes')) as attended,
     allergies_dietary_restrictions,
