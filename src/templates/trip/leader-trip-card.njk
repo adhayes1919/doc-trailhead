@@ -263,6 +263,7 @@ on time. 24 hours before trip-start you can begin checking out your trip.
       <input name=assigned_pcard
              type=text
              value="{{ pcard_request.assigned_pcard }}"
+             required
              {% if pcard_request.is_approved === 1 %}disabled{%endif%}
              >
     </label>
