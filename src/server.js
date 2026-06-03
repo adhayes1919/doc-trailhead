@@ -30,11 +30,16 @@ export function startServer(trailheadDb, port) {
     .addGlobal('FULLCALENDAR_VERSION', FULLCALENDAR_VERSION)
     .addGlobal('ORIGIN', constants.ORIGIN)
   app.set('views', 'templates/views')
-
   app.use((req, _res, next) => { req.db = trailheadDb; next() })
   app.get('/healthcheck', (_, res) => { res.send('OK') })
   app.use('/', apiRouter)
+  app.all('*', (req, res, next) => {
+    //TODO: clean this
+    //TODO: code vs status? (here, handleError, and in errors.js)
+    next({ code: 404, status: 404, message: 'Page not found' })
+  })
   app.use(handleError)
+
 
   const server = app.listen(port)
   console.log(`Server running at http://localhost:${server.address().port}`)
@@ -43,7 +48,12 @@ export function startServer(trailheadDb, port) {
 }
 
 function handleError(err, req, res, _next) {
-  if (err.code < 500) {
+  console.log("handling an error...")
+  if (err.code == 403) {
+    res.status(err.code).render('errors/response403.njk')
+  } else if (err.code == 404) {
+    res.status(err.code).render('errors/response404.njk')
+  } else if (err.code < 500) {
     res.status(err.code).send(err.message)
   } else {
     console.error(`Unexpected error for ${req.method} ${req.url}, sending 500`)
